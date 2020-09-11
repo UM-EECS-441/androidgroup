@@ -1,9 +1,9 @@
 # EECS441 F20 Android Group
 
-|  Team Info |  Wiki |  Board   |
+|  Team Info |  Wiki |  Trello   |
 |:----------:|:-----:|:--------:|
 |![about]|![tech]|![process]|
-|[Team Commitment Contract][about_page]|[Project Documentation Wiki][tech_page]|[Trello Agile Management][process_page]|
+|[Team Commitment Contract][about_page]|[Project Documentation Wiki][tech_page]|[Agile Management Board][process_page]|
 
 [about]: https://github.com/UM-EECS-441/labs/blob/master/docs/img/admin/team.png "Team Info"
 <!-- [setup]: https://github.com/CAEN/michigan-covid19-check/blob/dev/public/tools.png "Setup and Install" -->

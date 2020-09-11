@@ -10,7 +10,7 @@
 <!-- [setup]: https://github.com/CAEN/michigan-covid19-check/blob/dev/public/tools.png "Setup and Install" -->
 [tech]: https://github.com/UM-EECS-441/labs/blob/master/docs/img/admin/wiki.png "Wiki"
 [process]: https://github.com/UM-EECS-441/labs/blob/master/docs/img/admin/board.png "Board"
-[grade sheet]: https://
+[grade sheet]: https://docs.google.com/spreadsheets/d/1gCBonEM7pENapuPvllwpZNrV7Z6xw3wDUYHzfT3OFLQ/edit?usp=sharing
 [about_page]: https://
 <!-- [setup_page]: https://github.com/CAEN/michigan-covid19-check/wiki/Setup-and-Install) -->
 [tech_page]: https://github.com/UM-EECS-441/androidgroup/wiki

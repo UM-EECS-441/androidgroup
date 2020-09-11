@@ -3,7 +3,7 @@
 | Gradesheet | Team Info |  Wiki |  Trello   |
 |:----------:|:---------:|:-----:|:---------:|
 |![grades]|![about]|![tech]|![process]|
-|[Team Grade Sheet][grade sheet]|[Team Commitment Contract][about_page]|[Project Documentation Wiki][tech_page]|[Agile Management Board][process_page]|
+|[Team Grade Sheet][grade sheet]|[Team Commitment Contract][about_page]|[Project Documentation][tech_page]|[Agile Management Board][process_page]|
 
 [grades]: https://github.com/UM-EECS-441/labs/blob/master/docs/img/admin/grades3.png "Grade Sheet"
 [about]: https://github.com/UM-EECS-441/labs/blob/master/docs/img/admin/team.png "Team Info"

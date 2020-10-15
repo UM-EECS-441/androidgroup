@@ -30,12 +30,9 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     }
 
     fun createTable(schema: Schema) {
-        val db = this.writableDatabase
-
-
-
         try {
-            db.execSQL("INSERT INTO DATASET (TableName) VALUES ('${schema.name}')")
+            val db = this.writableDatabase
+            
             var sqlQuery = "CREATE TABLE ${schema.name} (" +
                     "ID INTEGER PRIMARY KEY,"
             for (idx in 0 until schema.columns.size) {
@@ -46,8 +43,14 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
             }
             sqlQuery += ")"
             db.execSQL(sqlQuery)
+            // Insert to the table that keeps track of all data sets
+            db.execSQL("INSERT INTO DATASET (TableName) VALUES ('${schema.name}')")
         }
         catch(e: android.database.sqlite.SQLiteConstraintException) {
+            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+            Log.e("Error", e.message)
+        }
+        catch(e: android.database.sqlite.SQLiteException) {
             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             Log.e("Error", e.message)
         }
@@ -57,6 +60,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun deleteTable(tableName: String) {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM DATASET WHERE TableName='$tableName'")
+        db.execSQL("DROP TABLE '$tableName'")
     }
 
     fun getAllDatabase(): ArrayList<String> {

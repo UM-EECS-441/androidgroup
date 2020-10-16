@@ -55,6 +55,7 @@ class GraphActivity : AppCompatActivity() {
         val mockLabel = arrayOf("First", "Second", "Third", "Fifth")
         val dataSet = BarDataSet(mockData, "BarDataSet")
         val barData = BarData(dataSet)
+        barData.setValueTextSize(16F)
         chart.data = barData
         chart.description.isEnabled = false
         chart.xAxis.isEnabled = true
@@ -69,7 +70,6 @@ class GraphActivity : AppCompatActivity() {
         chart.axisRight.isEnabled = false
         chart.isScaleYEnabled = false
         chart.isHighlightPerDragEnabled = false
-
         chart.invalidate()
     }
 }
@@ -80,8 +80,8 @@ class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormat
     }
 }
 
-class BarChartSelectedListener : OnChartValueSelectedListener {
-    override fun onValueSelected(e: Entry?, h: Highlight?) {
-        e.
-    }
-}
+//class BarChartSelectedListener : OnChartValueSelectedListener {
+//    override fun onValueSelected(e: Entry?, h: Highlight?) {
+//        e.
+//    }
+//}

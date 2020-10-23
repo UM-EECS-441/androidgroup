@@ -72,6 +72,27 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 //        }
     }
 
+    private fun textProcessing(text: String) {
+        if ((text.contains("make") || text.contains("create")) && text.contains("data")) {
+            var name = " "
+            for (word in text.split(" ")) {
+                Log.i("SpeechRecognizer", "text response word: ".plus(word))
+                if (word == "name") {
+                    var idx = text.indexOf("name") + 5
+                    name = text.substring(idx)
+                    break
+                } else if (word == "named") {
+                    var idx = text.indexOf("named") + 6
+                    name = text.substring(idx)
+                    break
+                }
+            }
+            Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
+            Toast.makeText(this, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
+            // Run create dataset function
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == RECOGNIZER_REQUEST_CODE) {
@@ -79,6 +100,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 val textView = findViewById<TextView>(R.id.textView)
                 textView.text = res[0]
+                Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
+                textProcessing(res[0])
             }
         }
     }

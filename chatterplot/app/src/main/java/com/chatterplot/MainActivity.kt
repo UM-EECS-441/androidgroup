@@ -10,16 +10,15 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.View
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import android.widget.ToggleButton
+import android.widget.*
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity(), RecognitionListener {
     private val permission = 10
+    private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
-    private lateinit var toggleButton: ToggleButton
+    private lateinit var recognizerButton: Button
 //    private lateinit var progressBar: ProgressBar
     private lateinit var speech: SpeechRecognizer
     private lateinit var recognizerIntent: Intent
@@ -27,8 +26,19 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if(ContextCompat.checkSelfPermission(this@MainActivity,
+            Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this@MainActivity,
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO
+                ), permission
+            )
+        }
+
         returnedText = findViewById(R.id.textView)
-        toggleButton = findViewById(R.id.toggleButton)
+        recognizerButton = findViewById<Button>(R.id.recognizerButton)
+//        progressBar = findViewById(R.id.progressBar)
 
         speech = SpeechRecognizer.createSpeechRecognizer(this)
         Log.i("SpeechRecognizer","isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
@@ -39,19 +49,36 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
 
-        toggleButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-//                progressBar.visibility = View.VISIBLE
-//                progressBar.isIndeterminate = true
-                Log.i("SpeechRecognizer","Asking Record Audio permission")
-                ActivityCompat.requestPermissions(this@MainActivity,
-                    arrayOf(Manifest.permission.RECORD_AUDIO),
-                    permission)
-            } else {
-//                progressBar.isIndeterminate = false
-//                progressBar.visibility = View.VISIBLE
-                speech.stopListening()
-                Log.i("SpeechRecognizer","stop listening")
+        recognizerButton.setOnClickListener { v ->
+            startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
+        }
+
+//        setOnCheckedChangeListener { _, isChecked ->
+//            if (isChecked) {
+////                progressBar.visibility = View.VISIBLE
+////                progressBar.isIndeterminate = true
+//                startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
+////                speech.startListening(recognizerIntent)
+////                Log.i("SpeechRecognizer","Asking Record Audio permission")
+////                ActivityCompat.requestPermissions(this@MainActivity,
+////                    arrayOf(Manifest.permission.RECORD_AUDIO),
+////                    permission)
+//            } else {
+////                progressBar.isIndeterminate = false
+////                progressBar.visibility = View.VISIBLE
+////                speech.stopListening()
+//                Log.i("SpeechRecognizer","stop listening")
+//            }
+//        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == RECOGNIZER_REQUEST_CODE) {
+            if(resultCode == RESULT_OK || null != data) {
+                val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                val textView = findViewById<TextView>(R.id.textView)
+                textView.text = res[0]
             }
         }
     }
@@ -59,16 +86,22 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
                                             grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            permission -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager
-                    .PERMISSION_GRANTED) {
-                Log.i("SpeechRecognizer","Permission Granted, start listening")
-                speech.startListening(recognizerIntent)
-            } else {
-                Toast.makeText(this@MainActivity, "Permission Denied!",
-                    Toast.LENGTH_SHORT).show()
+        if(requestCode == permission) {
+            if(grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                Toast.makeText(this, "Audio access denied", Toast.LENGTH_SHORT).show()
+                finish()
             }
         }
+//        when (requestCode) {
+//            permission -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager
+//                    .PERMISSION_GRANTED) {
+//                Log.i("SpeechRecognizer","Permission Granted, start listening")
+//                speech.startListening(recognizerIntent)
+//            } else {
+//                Toast.makeText(this@MainActivity, "Permission Denied!",
+//                    Toast.LENGTH_SHORT).show()
+//            }
+//        }
     }
 
     override fun onReadyForSpeech(params: Bundle?) {
@@ -99,14 +132,14 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     override fun onEndOfSpeech() {
 //        progressBar.isIndeterminate = true
         Log.i("SpeechRecognizer", "onEndOfSpeech")
-        toggleButton.isChecked = false
+//        toggleButton.isChecked = false
     }
 
     override fun onError(error: Int) {
         val errorMessage: String = getErrorText(error)
         Log.d("SpeechRecognizer", "FAILED $errorMessage")
         returnedText.text = errorMessage
-        toggleButton.isChecked = false
+//        toggleButton.isChecked = false
     }
 
     private fun getErrorText(error: Int): String {

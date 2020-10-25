@@ -15,4 +15,32 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Button to create dataset-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/createTableButton"
+        android:text="Create"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <!-- Button that shows all database-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/databaseButton"
+        android:text="See Database"
+        android:onClick="showAllDatabase"
+        app:layout_constraintTop_toBottomOf="@id/createTableButton"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <!-- Button to show example chart -->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/graphButton"
+        android:text="See Graph"
+        android:onClick="showGraph"
+        app:layout_constraintTop_toBottomOf="@id/databaseButton"
+        app:layout_constraintRight_toRightOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

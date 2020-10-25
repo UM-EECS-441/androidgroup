@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".MainActivity">
 <!--    <ImageView-->
 <!--        android:id="@+id/imageView"-->
 <!--        android:layout_width="200dp"-->
@@ -33,4 +35,33 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="260dp"
         android:text="ToggleButton" />
-</RelativeLayout>
+
+    <!-- Button to create dataset-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/createTableButton"
+        android:text="Create"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <!-- Button that shows all database-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/databaseButton"
+        android:text="See Database"
+        android:onClick="showAllDatabase"
+        app:layout_constraintTop_toBottomOf="@id/createTableButton"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <!-- Button to show example chart -->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/graphButton"
+        android:text="See Graph"
+        android:onClick="showGraph"
+        app:layout_constraintTop_toBottomOf="@id/databaseButton"
+        app:layout_constraintRight_toRightOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

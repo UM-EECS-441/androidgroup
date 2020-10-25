@@ -1,5 +1,6 @@
 package com.chatterplot
 
+
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,11 @@ import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), RecognitionListener {
     private val permission = 10
@@ -70,6 +76,10 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 //                Log.i("SpeechRecognizer","stop listening")
 //            }
 //        }
+        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
+        createDatasetButton.setOnClickListener { view ->
+            showCreateDialog(view)
+        }
     }
 
     private fun textProcessing(text: String) {
@@ -190,5 +200,37 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             for (result in matches) text = result.trimIndent()
         }
         returnedText.text = text
+    }
+
+    fun showCreateDialog(v: View) {
+        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
+        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
+        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
+        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
+
+        val alertDialog = AlertDialog.Builder(this)
+        alertDialog.setTitle("Create new dataset")
+        alertDialog.setView(createDialog)
+        alertDialog.setNegativeButton("Cancel", null)
+        alertDialog.setPositiveButton("Create")  {dialog, which ->
+            val tableName = datasetName.text.toString()
+            val xAxis = datasetIndependent.text.toString()
+            val yAxis = datasetDependent.text.toString()
+            val schema = Schema(tableName)
+            schema.addColumn(xAxis, "Int")
+            schema.addColumn(yAxis, "Int")
+            DatabaseHelper(this).createTable(schema)
+        }
+        alertDialog.create().show()
+    }
+
+    fun showAllDatabase(v:View?) {
+        val intent = Intent(this, DatabaseActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun showGraph(v: View) {
+        val intent = Intent(this, GraphActivity::class.java)
+        startActivity(intent)
     }
 }

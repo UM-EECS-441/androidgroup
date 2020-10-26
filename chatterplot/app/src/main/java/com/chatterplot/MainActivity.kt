@@ -24,9 +24,9 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
     private lateinit var recognizerButton: Button
-//    private lateinit var progressBar: ProgressBar
     private lateinit var speech: SpeechRecognizer
     private lateinit var recognizerIntent: Intent
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,23 +58,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         }
 
-//        setOnCheckedChangeListener { _, isChecked ->
-//            if (isChecked) {
-////                progressBar.visibility = View.VISIBLE
-////                progressBar.isIndeterminate = true
-//                startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
-////                speech.startListening(recognizerIntent)
-////                Log.i("SpeechRecognizer","Asking Record Audio permission")
-////                ActivityCompat.requestPermissions(this@MainActivity,
-////                    arrayOf(Manifest.permission.RECORD_AUDIO),
-////                    permission)
-//            } else {
-////                progressBar.isIndeterminate = false
-////                progressBar.visibility = View.VISIBLE
-////                speech.stopListening()
-//                Log.i("SpeechRecognizer","stop listening")
-//            }
-//        }
         val createDatasetButton = findViewById<Button>(R.id.createTableButton)
         createDatasetButton.setOnClickListener { view ->
             showCreateDialog(view)
@@ -218,7 +201,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             val schema = Schema(tableName)
             schema.addColumn(xAxis, "Int")
             schema.addColumn(yAxis, "Int")
-            DatabaseHelper(this).createTable(schema)
+            try {
+                DatabaseHelper(this).createTable(schema)
+            } catch(e: Exception) {
+                Log.e("DB Error", e.localizedMessage!!.toString())
+            }
+
         }
         alertDialog.create().show()
     }

@@ -17,7 +17,7 @@ class Schema(val name: String) {
 
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY)"
+        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp FLOAT)"
         db!!.execSQL(sqlQuery)
     }
 
@@ -26,9 +26,35 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         onCreate(db)
     }
 
-    fun insertRow(tableName:String, values:ContentValues) {
+    private fun updateTimestamp(tableName: String) {
         val db = this.writableDatabase
-        db.insertOrThrow(tableName, null, values)
+        val sqlval = ContentValues()
+        sqlval.put("Timestamp", System.currentTimeMillis() / 1000)
+        db.update("DATASET", sqlval, "TableName=${tableName}", null)
+    }
+
+    fun getColumnNames(tableName: String): Array<String> {
+        val db = this.readableDatabase
+        val cursor = db.query(tableName, null, null, null, null, null, null)
+        val colNames = cursor.columnNames
+        cursor.close()
+        return colNames
+    }
+
+    fun insertRow(tableName:String, values:ArrayList<String>, byColumn: Boolean=false) {
+        //TODO: implement by column insertion
+        val sqlval = ContentValues()
+        val colNames = getColumnNames(tableName)
+        if(colNames.size != values.size) {
+            throw Exception("Number of input does not match number of columns")
+        }
+        for(i in 1 until colNames.size) {
+            sqlval.put(colNames[i], values[i])
+        }
+        sqlval.put("Timestamp", System.currentTimeMillis()/1000)
+        val db = this.writableDatabase
+        db.insertOrThrow(tableName, null, sqlval)
+        updateTimestamp(tableName)
     }
 
     fun deleteRow(tableName:String, where:String?, args:Array<String>?) {
@@ -40,32 +66,44 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         this.writableDatabase.update(tableName, values, where, args)
     }
 
-    fun createTable(schema: Schema) {
-        try {
-            val db = this.writableDatabase
+    fun getAllDatabaseNames(): ArrayList<String> {
+        val db = this.writableDatabase
+        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, null)
+        val result = arrayListOf<String>()
+        while(cursor.moveToNext()) {
+            result.add(cursor.getString(0))
+        }
+        cursor.close()
+        return result
+    }
 
-            var sqlQuery = "CREATE TABLE ${schema.name} (" +
-                    "ID INTEGER PRIMARY KEY,"
-            for (idx in 0 until schema.columns.size) {
-                sqlQuery += "${schema.columns[idx].first} ${schema.columns[idx].second}"
-                if (idx != schema.columns.size - 1) {
-                    sqlQuery += ","
-                }
+    fun getTable(tableName: String): MutableMap<String, ArrayList<Any>> {
+        val db = this.writableDatabase
+        val cursor = db.query(tableName, null, null, null, null, null, null)
+        val colNames = cursor.columnNames
+        val resultDict = mutableMapOf<String, ArrayList<Any>>()
+        for(col in colNames) {
+            resultDict[col] = ArrayList()
+        }
+        while(cursor.moveToNext()) {
+            for (col in colNames) {
+                resultDict[col]!!.add(cursor.getString(cursor.getColumnIndex(col)))
             }
-            sqlQuery += ")"
-            db.execSQL(sqlQuery)
-            // Insert to the table that keeps track of all data sets
-            db.execSQL("INSERT INTO DATASET (TableName) VALUES ('${schema.name}')")
         }
-        catch(e: android.database.sqlite.SQLiteConstraintException) {
-            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-            Log.e("Error", e.message)
-        }
-        catch(e: android.database.sqlite.SQLiteException) {
-            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-            Log.e("Error", e.message)
-        }
+        cursor.close()
+        return resultDict
+    }
 
+    fun createTable(schema: Schema) {
+        val db = this.writableDatabase
+        var sqlQuery = "CREATE TABLE ${schema.name} ("
+        for (idx in 0 until schema.columns.size) {
+            sqlQuery += "${schema.columns[idx].first} ${schema.columns[idx].second}, "
+        }
+        sqlQuery += "Timestamp FLOAT)"
+        db.execSQL(sqlQuery)
+        // Insert to the table that keeps track of all data sets
+        db.execSQL("INSERT INTO DATASET (TableName, Timestamp) VALUES ('${schema.name}', ${System.currentTimeMillis() / 1000})")
     }
 
     fun deleteTable(tableName: String) {
@@ -76,7 +114,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getAllDatabase(): ArrayList<String> {
         val db: SQLiteDatabase = this.writableDatabase
-//        val tables = db.query("SELECT * FROM DATASET", null)
         val result = arrayListOf<String>()
         val tables = db.query("DATASET", arrayOf("TableName"), null, null, null, null, null)
         while(tables.moveToNext()) {
@@ -87,10 +124,10 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
                 info += ", $item"
             }
             result.add(info)
+            columns.close()
         }
+        tables.close()
         return result
-//        return db.rawQuery("SELECT TableName FROM DATASET", null)
-//        return db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name!='android_metadata' order by name", null)
     }
 
     companion object {

@@ -14,7 +14,9 @@ class DatabaseActivity : AppCompatActivity() {
     }
 
     fun getListOfTables(text: TextView) {
-        val dbList = DatabaseHelper(this).getAllDatabase()
-        text.text = dbList.joinToString("\n")
+//        val dbList = DatabaseHelper(this).getAllDatabase()
+        val info = DatabaseHelper(this).getTable("test5")
+//        text.text = dbList.joinToString("\n")
+        text.text = info.toString()
     }
 }

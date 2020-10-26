@@ -107,16 +107,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 finish()
             }
         }
-//        when (requestCode) {
-//            permission -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager
-//                    .PERMISSION_GRANTED) {
-//                Log.i("SpeechRecognizer","Permission Granted, start listening")
-//                speech.startListening(recognizerIntent)
-//            } else {
-//                Toast.makeText(this@MainActivity, "Permission Denied!",
-//                    Toast.LENGTH_SHORT).show()
-//            }
-//        }
     }
 
     override fun onReadyForSpeech(params: Bundle?) {

@@ -2,11 +2,14 @@ package com.chatterplot
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 
 class Schema(val name: String) {
     val columns = ArrayList<Pair<String, String>>()

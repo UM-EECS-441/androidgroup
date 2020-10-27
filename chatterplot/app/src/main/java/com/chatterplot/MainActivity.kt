@@ -19,7 +19,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), RecognitionListener {
+class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
         returnedText = findViewById(R.id.textView)
         recognizerButton = findViewById<Button>(R.id.recognizerButton)
-//        progressBar = findViewById(R.id.progressBar)
 
         speech = SpeechRecognizer.createSpeechRecognizer(this)
         Log.i("SpeechRecognizer","isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
@@ -107,71 +106,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 finish()
             }
         }
-    }
-
-    override fun onReadyForSpeech(params: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRmsChanged(rmsdB: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBufferReceived(buffer: ByteArray?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPartialResults(partialResults: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBeginningOfSpeech() {
-        Log.i("SpeechRecognizer", "onBeginningOfSpeech")
-//        progressBar.isIndeterminate = false
-//        progressBar.max = 10
-    }
-    override fun onEndOfSpeech() {
-//        progressBar.isIndeterminate = true
-        Log.i("SpeechRecognizer", "onEndOfSpeech")
-//        toggleButton.isChecked = false
-    }
-
-    override fun onError(error: Int) {
-        val errorMessage: String = getErrorText(error)
-        Log.d("SpeechRecognizer", "FAILED $errorMessage")
-        returnedText.text = errorMessage
-//        toggleButton.isChecked = false
-    }
-
-    private fun getErrorText(error: Int): String {
-        var message = ""
-        message = when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client side error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
-            SpeechRecognizer.ERROR_SERVER -> "error from server"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-            else -> "Didn't understand, please try again."
-        }
-        return message
-    }
-
-    override fun onResults(results: Bundle?) {
-        Log.i("SpeechRecognizer", "onResults")
-        val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        var text = ""
-        if (matches != null) {
-            for (result in matches) text = result.trimIndent()
-        }
-        returnedText.text = text
     }
 
     fun showCreateDialog(v: View) {

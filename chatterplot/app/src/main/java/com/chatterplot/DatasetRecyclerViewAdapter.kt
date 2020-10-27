@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -34,11 +35,28 @@ class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>)
         }
 
         holder.itemView.deleteDatasetButton.setOnClickListener {
-            DatabaseHelper(context).deleteTable(currentItem.name)
-            val intent = Intent(context, MainActivity::class.java)
-            context.startActivity(intent)
-            val t = Toast.makeText(context, "Dataset Deleted", Toast.LENGTH_LONG)
-            t.show()
+
+            val builder = AlertDialog.Builder(context)
+            builder.setMessage("Are you sure you want to Delete?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes") { dialog, id ->
+                        DatabaseHelper(context).deleteTable(currentItem.name)
+
+                        val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
+                        val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
+                        t.show()
+
+                        val intent = Intent(context, MainActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                    .setNegativeButton("No") { dialog, id ->
+                        // Dismiss the dialog
+                        dialog.dismiss()
+                    }
+            val alert = builder.create()
+            alert.show()
+
+
         }
     }
 

@@ -18,12 +18,12 @@ class DatabaseActivity : AppCompatActivity() {
     }
 
     fun getListOfTables(text: TextView) {
-//        val dbList = DatabaseHelper(this).getAllDatabase()
-        val db = DatabaseHelper(this)
-        db.insertRow("test5", arrayListOf("hello", "world"))
-        val info = db.getTable("test5")
-//        text.text = dbList.joinToString("\n")
-        text.text = info.toString()
+        val dbList = DatabaseHelper(this).getAllDatabase()
+//        val db = DatabaseHelper(this)
+//        db.insertRow("test5", arrayListOf("hello", "world"))
+//        val info = db.getTable("test5")
+        text.text = dbList.joinToString("\n")
+//        text.text = info.toString()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

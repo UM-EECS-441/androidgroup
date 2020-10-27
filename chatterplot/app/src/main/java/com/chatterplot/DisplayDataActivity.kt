@@ -12,7 +12,7 @@ class DisplayDataActivity : AppCompatActivity() {
         setContentView(R.layout.activity_display_data)
 
         //create tableAdapter
-        adapter = TableAdapter(this, "", "")
+        adapter = TableAdapter(this, "")
         adapter.loadTable()
         //intent should include DB path/name and specified DB to open
     }

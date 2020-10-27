@@ -1,9 +1,12 @@
 package com.chatterplot
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NavUtils
@@ -14,15 +17,23 @@ class DatabaseActivity : AppCompatActivity() {
         setContentView(R.layout.activity_database)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        getListOfTables(findViewById<TextView>(R.id.dbList))
+        getListOfTables(findViewById<ListView>(R.id.datasetList))
     }
 
-    fun getListOfTables(text: TextView) {
+    fun getListOfTables(lv: ListView) {
         val dbList = DatabaseHelper(this).getAllDatabase()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, dbList)
+        lv.adapter = adapter
+        lv.setOnItemClickListener() { _, _, position, _ ->
+            // start intent with dataset name at position
+            var intent = Intent(this, DisplayDataActivity::class.java)
+            intent.putExtra("DATASET", dbList[position])
+            startActivity(intent)
+        }
 //        val db = DatabaseHelper(this)
 //        db.insertRow("test5", arrayListOf("hello", "world"))
 //        val info = db.getTable("test5")
-        text.text = dbList.joinToString("\n")
+//        text.text = dbList.joinToString("\n")
 //        text.text = info.toString()
     }
 

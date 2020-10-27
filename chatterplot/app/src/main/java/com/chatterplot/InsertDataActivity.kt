@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -43,5 +44,9 @@ class InsertDataActivity : AppCompatActivity() {
 
     private fun insertFunction(insertValues : ArrayList<String>) {
         DatabaseHelper(this).insertRow(datasetName, insertValues)
+        val t = Toast.makeText(this, "Data point added!", Toast.LENGTH_LONG)
+        t.show()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
     }
 }

@@ -18,12 +18,11 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 
-class MainActivity : AppCompatActivity(), RecognitionListener {
+class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
     private lateinit var recognizerButton: Button
-    private lateinit var speech: SpeechRecognizer
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,11 +41,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
         returnedText = findViewById(R.id.textView)
         recognizerButton = findViewById<Button>(R.id.recognizerButton)
-//        progressBar = findViewById(R.id.progressBar)
-
-        speech = SpeechRecognizer.createSpeechRecognizer(this)
-        Log.i("SpeechRecognizer","isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
-        speech.setRecognitionListener(this)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -63,26 +57,26 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         }
     }
 
-    private fun textProcessing(text: String) {
-        if ((text.contains("make") || text.contains("create")) && text.contains("data")) {
-            var name = " "
-            for (word in text.split(" ")) {
-                Log.i("SpeechRecognizer", "text response word: ".plus(word))
-                if (word == "name") {
-                    var idx = text.indexOf("name") + 5
-                    name = text.substring(idx)
-                    break
-                } else if (word == "named") {
-                    var idx = text.indexOf("named") + 6
-                    name = text.substring(idx)
-                    break
-                }
-            }
-            Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
-            Toast.makeText(this, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
-            // Run create dataset function
-        }
-    }
+//    private fun textProcessing(text: String) {
+//        if ((text.contains("make") || text.contains("create")) && text.contains("data")) {
+//            var name = " "
+//            for (word in text.split(" ")) {
+//                Log.i("SpeechRecognizer", "text response word: ".plus(word))
+//                if (word == "name") {
+//                    var idx = text.indexOf("name") + 5
+//                    name = text.substring(idx)
+//                    break
+//                } else if (word == "named") {
+//                    var idx = text.indexOf("named") + 6
+//                    name = text.substring(idx)
+//                    break
+//                }
+//            }
+//            Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
+//            Toast.makeText(this, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
+//            // Run create dataset function
+//        }
+//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -92,7 +86,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 val textView = findViewById<TextView>(R.id.textView)
                 textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
-                textProcessing(res[0])
+                val SpeechProcessor = SpeechProcessor(this)
+                SpeechProcessor.textProcessing(res[0])
             }
         }
     }
@@ -106,81 +101,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 finish()
             }
         }
-//        when (requestCode) {
-//            permission -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager
-//                    .PERMISSION_GRANTED) {
-//                Log.i("SpeechRecognizer","Permission Granted, start listening")
-//                speech.startListening(recognizerIntent)
-//            } else {
-//                Toast.makeText(this@MainActivity, "Permission Denied!",
-//                    Toast.LENGTH_SHORT).show()
-//            }
-//        }
-    }
-
-    override fun onReadyForSpeech(params: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRmsChanged(rmsdB: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBufferReceived(buffer: ByteArray?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPartialResults(partialResults: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBeginningOfSpeech() {
-        Log.i("SpeechRecognizer", "onBeginningOfSpeech")
-//        progressBar.isIndeterminate = false
-//        progressBar.max = 10
-    }
-    override fun onEndOfSpeech() {
-//        progressBar.isIndeterminate = true
-        Log.i("SpeechRecognizer", "onEndOfSpeech")
-//        toggleButton.isChecked = false
-    }
-
-    override fun onError(error: Int) {
-        val errorMessage: String = getErrorText(error)
-        Log.d("SpeechRecognizer", "FAILED $errorMessage")
-        returnedText.text = errorMessage
-//        toggleButton.isChecked = false
-    }
-
-    private fun getErrorText(error: Int): String {
-        var message = ""
-        message = when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client side error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
-            SpeechRecognizer.ERROR_SERVER -> "error from server"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-            else -> "Didn't understand, please try again."
-        }
-        return message
-    }
-
-    override fun onResults(results: Bundle?) {
-        Log.i("SpeechRecognizer", "onResults")
-        val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        var text = ""
-        if (matches != null) {
-            for (result in matches) text = result.trimIndent()
-        }
-        returnedText.text = text
     }
 
     fun showCreateDialog(v: View) {

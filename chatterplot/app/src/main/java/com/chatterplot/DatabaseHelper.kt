@@ -9,7 +9,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class Schema(val name: String) {
     val columns = ArrayList<Pair<String, String>>()
@@ -33,7 +36,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         val sqlval = ContentValues()
         sqlval.put("Timestamp", System.currentTimeMillis() / 1000)
-        db.update("DATASET", sqlval, "TableName=${tableName}", null)
+        db.update("DATASET", sqlval, "TableName='${tableName}'", null)
     }
 
     fun getColumnNames(tableName: String): Array<String> {
@@ -48,11 +51,13 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         //TODO: implement by column insertion
         val sqlval = ContentValues()
         val colNames = getColumnNames(tableName)
-        if(colNames.size != values.size) {
+
+        // ID and Timestamp does not need to be provided
+        if(colNames.size - 2 != values.size) {
             throw Exception("Number of input does not match number of columns")
         }
-        for(i in 1 until colNames.size) {
-            sqlval.put(colNames[i], values[i])
+        for(i in 0 until values.size) {
+            sqlval.put(colNames[i+1], values[i])
         }
         sqlval.put("Timestamp", System.currentTimeMillis()/1000)
         val db = this.writableDatabase
@@ -90,7 +95,15 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
         while(cursor.moveToNext()) {
             for (col in colNames) {
-                resultDict[col]!!.add(cursor.getString(cursor.getColumnIndex(col)))
+                if(col == "Timestamp") {
+                    val timestamp = cursor.getFloat(cursor.getColumnIndex(col)).toLong()
+//                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+                    val cal = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    resultDict[col]!!.add(cal)
+                }
+                else {
+                    resultDict[col]!!.add(cursor.getString(cursor.getColumnIndex(col)))
+                }
             }
         }
         cursor.close()
@@ -99,7 +112,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun createTable(schema: Schema) {
         val db = this.writableDatabase
-        var sqlQuery = "CREATE TABLE ${schema.name} ("
+        var sqlQuery = "CREATE TABLE ${schema.name} (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" + ","
         for (idx in 0 until schema.columns.size) {
             sqlQuery += "${schema.columns[idx].first} ${schema.columns[idx].second}, "
         }

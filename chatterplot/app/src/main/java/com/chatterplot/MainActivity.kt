@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
     private lateinit var recognizerButton: Button
-    private lateinit var speech: SpeechRecognizer
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,10 +42,6 @@ class MainActivity : AppCompatActivity() {
 
         returnedText = findViewById(R.id.textView)
         recognizerButton = findViewById<Button>(R.id.recognizerButton)
-
-//        speech = SpeechRecognizer.createSpeechRecognizer(this)
-//        Log.i("SpeechRecognizer","isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
-//        speech.setRecognitionListener(this)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,

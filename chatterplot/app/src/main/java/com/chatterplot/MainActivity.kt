@@ -10,6 +10,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
@@ -17,12 +18,12 @@ import androidx.core.content.ContextCompat
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
-    private lateinit var returnedText: TextView
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +40,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        returnedText = findViewById(R.id.textView)
         val recognizerButton = findViewById<FloatingActionButton>(R.id.recognizerButton)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
@@ -54,6 +54,21 @@ class MainActivity : AppCompatActivity() {
         val createDatasetButton = findViewById<Button>(R.id.createTableButton)
         createDatasetButton.setOnClickListener { view ->
             showCreateDialog(view)
+        }
+
+        val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
+        bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when(menuItem.itemId) {
+                R.id.search_dataset -> {
+                    Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
+                    true
+                }
+                R.id.create_dataset -> {
+                    showCreateDialog(null)
+                    true
+                }
+                else -> false
+            }
         }
     }
 
@@ -82,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showCreateDialog(v: View) {
+    fun showCreateDialog(v: View?) {
         val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
         val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
         val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
@@ -114,7 +129,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun showGraph(v: View) {
+    fun showGraph() {
         val intent = Intent(this, GraphActivity::class.java)
         startActivity(intent)
     }

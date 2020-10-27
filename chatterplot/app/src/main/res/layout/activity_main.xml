@@ -85,12 +85,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/createTableButton" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/recognizerButton"
-        app:layout_anchor="@id/bottom_app_bar" />
     <com.google.android.material.bottomappbar.BottomAppBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -99,6 +93,13 @@
         style="@style/Widget.MaterialComponents.BottomAppBar"
         android:theme="@style/AppThemeMaterial"
         app:fabAlignmentMode="center"
+        app:menu="@menu/bottom_app_bar_main"
         app:layout_anchorGravity="bottom"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/recognizerButton"
+        app:layout_anchor="@id/bottom_app_bar" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

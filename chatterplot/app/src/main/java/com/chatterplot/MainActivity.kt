@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
@@ -138,6 +137,11 @@ class MainActivity : AppCompatActivity() {
 
     fun showGraph(v: View) {
         val intent = Intent(this, GraphActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun startEditor(v:View?) {
+        val intent = Intent(this, DatasetListActivity::class.java)
         startActivity(intent)
     }
 }

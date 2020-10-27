@@ -30,14 +30,14 @@ class InsertDataActivity : AppCompatActivity() {
         yVal = findViewById(R.id.yInput)
         confirmButton = findViewById(R.id.confirmInsertButton)
 
-        val insertValues = ArrayList<String>()
 
-        insertValues.add(0, xVal.text.toString())
-        insertValues.add(1, yVal.text.toString())
 
 
         confirmButton.setOnClickListener {
-            insertFunction(insertValues)
+//            val insertValues = ArrayList<String>()
+//            insertValues.add(xVal.text.toString())
+//            insertValues.add(yVal.text.toString())
+            insertFunction(arrayListOf(xVal.text.toString(), yVal.text.toString()))
         }
     }
 

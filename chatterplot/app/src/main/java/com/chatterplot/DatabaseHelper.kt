@@ -134,13 +134,14 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val tables = db.query("DATASET", arrayOf("TableName"), null, null, null, null, null)
         while(tables.moveToNext()) {
             val name = tables.getString(0)
-            val columns = db.query(name, null, null, null, null, null, null)
-            var info = name
-            for (item in columns.columnNames) {
-                info += ", $item"
-            }
+            val info = getTable(name).toString()
+//            val columns = db.query(name, null, null, null, null, null, null)
+//            var info = name
+//            for (item in columns.columnNames) {
+//                info += ", $item"
+//            }
             result.add(info)
-            columns.close()
+//            columns.close()
         }
         tables.close()
         return result

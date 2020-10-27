@@ -31,13 +31,7 @@ class InsertDataActivity : AppCompatActivity() {
         yVal = findViewById(R.id.yInput)
         confirmButton = findViewById(R.id.confirmInsertButton)
 
-
-
-
         confirmButton.setOnClickListener {
-//            val insertValues = ArrayList<String>()
-//            insertValues.add(xVal.text.toString())
-//            insertValues.add(yVal.text.toString())
             insertFunction(arrayListOf(xVal.text.toString(), yVal.text.toString()))
         }
     }

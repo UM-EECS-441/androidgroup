@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.dataset_card.view.*
 
@@ -23,12 +25,20 @@ class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>)
 
         holder.imageView.setImageResource(currentItem.imageResource)
         holder.textView.text = currentItem.name
+        val context = holder.itemView.context
 
         holder.itemView.setOnClickListener {
-            val context = holder.itemView.context
             val intent = Intent(context, InsertDataActivity::class.java)
             intent.putExtra("DATASETNAME", currentItem.name)
             context.startActivity(intent)
+        }
+
+        holder.itemView.deleteDatasetButton.setOnClickListener {
+            DatabaseHelper(context).deleteTable(currentItem.name)
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
+            val t = Toast.makeText(context, "Dataset Deleted", Toast.LENGTH_LONG)
+            t.show()
         }
     }
 

@@ -87,7 +87,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getTable(tableName: String): MutableMap<String, ArrayList<Any>> {
         val db = this.writableDatabase
-        val cursor = db.query(tableName, null, null, null, null, null, null)
+        val cursor = db.query("[$tableName]", null, null, null, null, null, null)
         val colNames = cursor.columnNames
         val resultDict = mutableMapOf<String, ArrayList<Any>>()
         for(col in colNames) {

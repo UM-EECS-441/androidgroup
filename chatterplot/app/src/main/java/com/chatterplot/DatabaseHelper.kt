@@ -125,7 +125,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         var sqlQuery = "CREATE TABLE [${schema.name}] (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" + ","
         for (idx in 0 until schema.columns.size) {
-            sqlQuery += "${schema.columns[idx].first} ${schema.columns[idx].second}, "
+            sqlQuery += "[${schema.columns[idx].first}] ${schema.columns[idx].second}, "
         }
         sqlQuery += "Timestamp FLOAT)"
         db.execSQL(sqlQuery)

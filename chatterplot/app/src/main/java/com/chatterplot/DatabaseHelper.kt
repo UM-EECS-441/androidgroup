@@ -110,6 +110,17 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return resultDict
     }
 
+    fun createDataset(tableName: String, xAxis: String, yAxis: String) {
+        val schema = Schema(tableName)
+        schema.addColumn(xAxis, "Int")
+        schema.addColumn(yAxis, "Int")
+        try {
+            this.createTable(schema)
+        } catch(e: Exception) {
+            Log.e("DB Error", e.localizedMessage!!.toString())
+        }
+    }
+
     fun createTable(schema: Schema) {
         val db = this.writableDatabase
         var sqlQuery = "CREATE TABLE [${schema.name}] (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" + ","

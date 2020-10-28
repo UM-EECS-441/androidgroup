@@ -28,8 +28,14 @@ open class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetC
         holder.textView.text = currentItem.name
         val context = holder.itemView.context
 
-        holder.itemView.setOnClickListener {
+        holder.itemView.editButton.setOnClickListener {
             val intent = Intent(context, InsertDataActivity::class.java)
+            intent.putExtra("DATASETNAME", currentItem.name)
+            context.startActivity(intent)
+        }
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, DisplayDataActivity::class.java)
             intent.putExtra("DATASETNAME", currentItem.name)
             context.startActivity(intent)
         }
@@ -66,53 +72,5 @@ open class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetC
     class DatasetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.dataset_graph_preview
         val textView: TextView = itemView.dataset_name
-    }
-}
-
-
-/*
-* This class extends the original class above. It simply changes how a card acts when clicked.
-* Now we want to open DisplayDataActivity from the card
-*
-* */
-class DatasetRecyclerViewAdapterDisplay(private val datasetCardList: List<DatasetCard>) : DatasetRecyclerViewAdapter(datasetCardList) {
-    override fun onBindViewHolder(holder: DatasetViewHolder, position: Int) {
-        val currentItem = datasetCardList[position]
-
-        holder.imageView.setImageResource(currentItem.imageResource)
-        holder.textView.text = currentItem.name
-        val context = holder.itemView.context
-
-        holder.itemView.setOnClickListener {
-            val intent = Intent(context, DisplayDataActivity::class.java)
-            intent.putExtra("DATASETNAME", currentItem.name)
-            context.startActivity(intent)
-        }
-
-        holder.itemView.deleteDatasetButton.setOnClickListener {
-
-            val builder = AlertDialog.Builder(context)
-            val deleteMessage = "Are you sure you want to delete " + currentItem.name + "?"
-            builder.setMessage(deleteMessage)
-                .setCancelable(false)
-                .setPositiveButton("Yes") { dialog, id ->
-                    DatabaseHelper(context).deleteTable(currentItem.name)
-
-                    val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
-                    val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
-                    t.show()
-
-                    val intent = Intent(context, MainActivity::class.java)
-                    context.startActivity(intent)
-                }
-                .setNegativeButton("No") { dialog, id ->
-                    // Dismiss the dialog
-                    dialog.dismiss()
-                }
-            val alert = builder.create()
-            alert.show()
-
-
-        }
     }
 }

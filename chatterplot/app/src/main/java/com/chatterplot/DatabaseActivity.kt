@@ -13,7 +13,6 @@ import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_dataset_list.*
 
-
 class DatabaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +20,7 @@ class DatabaseActivity : AppCompatActivity() {
 
         val datasetList = getDatabases()
 
-        recycler_view.adapter = DatasetRecyclerViewAdapterDisplay(datasetList)
+        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
         recycler_view.layoutManager = LinearLayoutManager(this)
     }
 

@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private lateinit var returnedText: TextView
-    private lateinit var recognizerButton: Button
+    private lateinit var recognizerButton: ImageButton
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         returnedText = findViewById(R.id.textView)
-        recognizerButton = findViewById<Button>(R.id.recognizerButton)
+        recognizerButton = findViewById<ImageButton>(R.id.recognizerButton)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun startEditor(v:View?) {
+    fun showDatasetList(v:View?) {
         val intent = Intent(this, DatasetListActivity::class.java)
         startActivity(intent)
     }

@@ -1,14 +1,11 @@
 package com.chatterplot
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.dataset_card.view.*
 
@@ -26,38 +23,12 @@ class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>)
 
         holder.imageView.setImageResource(currentItem.imageResource)
         holder.textView.text = currentItem.name
-        val context = holder.itemView.context
 
         holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
             val intent = Intent(context, InsertDataActivity::class.java)
             intent.putExtra("DATASETNAME", currentItem.name)
             context.startActivity(intent)
-        }
-
-        holder.itemView.deleteDatasetButton.setOnClickListener {
-
-            val builder = AlertDialog.Builder(context)
-            val deleteMessage = "Are you sure you want to delete " + currentItem.name + "?"
-            builder.setMessage(deleteMessage)
-                    .setCancelable(false)
-                    .setPositiveButton("Yes") { dialog, id ->
-                        DatabaseHelper(context).deleteTable(currentItem.name)
-
-                        val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
-                        val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
-                        t.show()
-
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
-                    }
-                    .setNegativeButton("No") { dialog, id ->
-                        // Dismiss the dialog
-                        dialog.dismiss()
-                    }
-            val alert = builder.create()
-            alert.show()
-
-
         }
     }
 

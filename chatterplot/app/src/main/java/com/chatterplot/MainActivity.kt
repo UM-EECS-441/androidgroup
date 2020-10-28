@@ -144,7 +144,14 @@ class MainActivity : AppCompatActivity() {
             val tableName = datasetName.text.toString()
             val xAxis = datasetIndependent.text.toString()
             val yAxis = datasetDependent.text.toString()
-            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
+            val schema = Schema(tableName)
+            schema.addColumn(xAxis, "Int")
+            schema.addColumn(yAxis, "Int")
+            try {
+                DatabaseHelper(this).createTable(schema)
+            } catch(e: Exception) {
+                Log.e("DB Error", e.localizedMessage!!.toString())
+            }
 
         }
         alertDialog.create().show()

@@ -54,6 +54,9 @@ class InsertDataActivity : AppCompatActivity() {
         }
 
 
+
+//        xVal = findViewById(R.id.xInput)
+//        yVal = findViewById(R.id.yInput)
         confirmButton = findViewById(R.id.confirmInsertButton)
 
         confirmButton.setOnClickListener {

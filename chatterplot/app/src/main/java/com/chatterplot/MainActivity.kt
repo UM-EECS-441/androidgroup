@@ -20,10 +20,12 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
+    private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +66,9 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.create_dataset -> {
-                    showCreateDialog(null)
+                    val intent = Intent(this, CreateDatasetActivity::class.java)
+                    startActivityForResult(intent, CREATE_REQUEST_CODE)
+//                    showCreateDialog(null)
                     true
                 }
                 else -> false
@@ -82,6 +86,12 @@ class MainActivity : AppCompatActivity() {
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
                 speechProcessor.textProcessing(res[0])
+            }
+        }
+        else if(requestCode == CREATE_REQUEST_CODE) {
+            if(resultCode == RESULT_OK || null != data) {
+                val name: String = data!!.getStringExtra("NAME")
+                Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }
     }

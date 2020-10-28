@@ -18,9 +18,11 @@ import androidx.core.content.ContextCompat
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_dataset_list.*
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
@@ -30,7 +32,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_dataset_list)
+
+        val datasetList = getDatabases()
+
+        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
+        recycler_view.layoutManager = LinearLayoutManager(this)
+
 
         if(ContextCompat.checkSelfPermission(this@MainActivity,
             Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -78,6 +87,16 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    private fun getDatabases() : List<DatasetCard>{
+        val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
+        val cardList = ArrayList<DatasetCard>()
+        for (i in 0 until datasetNameList.size) {
+            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
+            cardList += newCard
+        }
+        return cardList
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

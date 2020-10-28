@@ -53,10 +53,10 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         }
 
-        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
-        createDatasetButton.setOnClickListener { view ->
-            showCreateDialog(view)
-        }
+//        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
+//        createDatasetButton.setOnClickListener { view ->
+//            showCreateDialog(view)
+//        }
 
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
@@ -69,6 +69,10 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(this, CreateDatasetActivity::class.java)
                     startActivityForResult(intent, CREATE_REQUEST_CODE)
 //                    showCreateDialog(null)
+                    true
+                }
+                R.id.setting_dataset -> {
+                    showAllDatabase(null)
                     true
                 }
                 else -> false
@@ -139,7 +143,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun showGraph() {
+    fun showGraph(v:View?) {
         val intent = Intent(this, GraphActivity::class.java)
         startActivity(intent)
     }

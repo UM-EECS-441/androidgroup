@@ -37,7 +37,8 @@ class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>)
         holder.itemView.deleteDatasetButton.setOnClickListener {
 
             val builder = AlertDialog.Builder(context)
-            builder.setMessage("Are you sure you want to Delete?")
+            val deleteMessage = "Are you sure you want to delete " + currentItem.name + "?"
+            builder.setMessage(deleteMessage)
                     .setCancelable(false)
                     .setPositiveButton("Yes") { dialog, id ->
                         DatabaseHelper(context).deleteTable(currentItem.name)

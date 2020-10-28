@@ -11,8 +11,9 @@ class DisplayDataActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_data)
 
+        val tableName = intent.getStringExtra("DATASETNAME")
         //create tableAdapter
-        adapter = TableAdapter(this, "")
+        adapter = TableAdapter(this, tableName)
         adapter.loadTable()
         //intent should include DB path/name and specified DB to open
     }

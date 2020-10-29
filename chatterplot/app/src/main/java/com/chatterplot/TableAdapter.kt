@@ -76,11 +76,14 @@ class TableAdapter {
 
         var i = 0
         for ((colKey, _) in tableData) {
-            var tv = titleRow.getChildAt(i) as TextView
-            tv.text = colKey
-            tv.setTypeface(null, Typeface.BOLD)
-            ++i
+            if (colKey != "ID" && colKey != "Timestamp") {
+                var rowNum: TextView = titleRow.getChildAt(i) as TextView
+                rowNum.text = colKey.toString()
+                rowNum.setTypeface(null, Typeface.BOLD)
+                ++i
+            }
         }
+        (tableView as ViewGroup).addView(titleRow)
 
 
         for (row in 0 until tableData["ID"]!!.size) {

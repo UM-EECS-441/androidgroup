@@ -33,10 +33,6 @@ class GraphActivity : AppCompatActivity() {
         tableName = intent.getStringExtra("DATASETNAME")
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
         graphDataset()
-//        val data = arrayOf(arrayOf(1.0,4.0), arrayOf(4.0,2.1), arrayOf(6.4,32.1), arrayOf(3.1, 5.3))
-
-//        createLineChart()
-//        createBarChart()
     }
     fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
@@ -45,9 +41,6 @@ class GraphActivity : AppCompatActivity() {
 
         for((key,value) in data) {
             if(key != "ID" && key != "Timestamp") {
-//                value.zip(timestamp!!)
-//                val combined = (0 until value.size).map{arrayOf((value[it] as String).toInt(), timestamp[it])}
-//                val combined = timestamp?.zip(value) {a, b->arrayOf((b as String).toInt(), a)}
                 val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
                     arrayOf(timestamp[it],(value[it] as String).toInt())
                 })

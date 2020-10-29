@@ -107,8 +107,8 @@ class MainActivity : AppCompatActivity() {
         if(requestCode == RECOGNIZER_REQUEST_CODE) {
             if(resultCode == RESULT_OK || null != data) {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                val textView = findViewById<TextView>(R.id.textView)
-                textView.text = res[0]
+//                val textView = findViewById<TextView>(R.id.textView)
+//                textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
                 speechProcessor.textProcessing(res[0])

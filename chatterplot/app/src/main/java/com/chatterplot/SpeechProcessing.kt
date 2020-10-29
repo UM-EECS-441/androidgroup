@@ -17,6 +17,22 @@ class SpeechProcessor(ctext: Context) {
         }
     }
 
+    fun insertDataset(text:String, tableName:String):Boolean {
+        if((text.contains("insert") || text.contains("add") ||
+                    text.contains("enter"))) {
+            val words= text.split(" ").toMutableList()
+//            val numbers = ArrayList<Int>()
+            words.removeAt(0)
+            for(word in words) {
+                word.toIntOrNull() ?: return false
+//                numbers.add(words[idx].toIntOrNull() ?: return false)
+            }
+            DatabaseHelper(context).insertRow(tableName, ArrayList(words))
+            return true
+        }
+        return false
+    }
+
     private fun createDataset(text: String): Boolean {
         if ((text.contains("make") || text.contains("create") ||
                     text.contains("new") || text.contains("start")) &&

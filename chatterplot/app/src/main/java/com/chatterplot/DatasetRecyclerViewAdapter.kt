@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.dataset_card.view.*
 
 
-open class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
+open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,

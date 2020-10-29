@@ -41,7 +41,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getColumnNames(tableName: String): Array<String> {
         val db = this.readableDatabase
-        val cursor = db.query(tableName, null, null, null, null, null, null)
+        val cursor = db.query("[$tableName]", null, null, null, null, null, null)
         val colNames = cursor.columnNames
         cursor.close()
         return colNames

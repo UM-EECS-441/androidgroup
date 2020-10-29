@@ -67,7 +67,6 @@ class InsertDataActivity : AppCompatActivity() {
         DatabaseHelper(this).insertRow(datasetName, insertValues)
         val t = Toast.makeText(this, "Data point added!", Toast.LENGTH_LONG)
         t.show()
-        val intent = Intent(this, MainActivity::class.java)
         finish()
     }
 

@@ -114,11 +114,8 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val schema = Schema(tableName)
         schema.addColumn(xAxis, "Int")
         schema.addColumn(yAxis, "Int")
-        try {
-            this.createTable(schema)
-        } catch(e: Exception) {
-            Log.e("DB Error", e.localizedMessage!!.toString())
-        }
+        this.createTable(schema)
+
     }
 
     fun createTable(schema: Schema) {

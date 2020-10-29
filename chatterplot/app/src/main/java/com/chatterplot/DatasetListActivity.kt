@@ -19,7 +19,7 @@ class DatasetListActivity : AppCompatActivity() {
         recycler_view.layoutManager = LinearLayoutManager(this)
     }
 
-    private fun getDatabases() : List<DatasetCard>{
+    private fun getDatabases() : ArrayList<DatasetCard>{
         val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
         val cardList = ArrayList<DatasetCard>()
         for (i in 0 until datasetNameList.size) {

@@ -57,11 +57,11 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
             throw Exception("Number of input does not match number of columns")
         }
         for(i in 0 until values.size) {
-            sqlval.put(colNames[i+1], values[i])
+            sqlval.put("[${colNames[i+1]}]", values[i])
         }
         sqlval.put("Timestamp", System.currentTimeMillis()/1000)
         val db = this.writableDatabase
-        db.insertOrThrow(tableName, null, sqlval)
+        db.insertOrThrow("[$tableName]", null, sqlval)
         updateTimestamp(tableName)
     }
 

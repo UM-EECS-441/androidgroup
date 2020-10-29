@@ -13,28 +13,6 @@ import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_dataset_list.*
 
-//class DatabaseActivity : AppCompatActivity() {
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_dataset_list)
-//
-//        val datasetList = getDatabases()
-//
-//        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
-//        recycler_view.layoutManager = LinearLayoutManager(this)
-//    }
-//
-//    private fun getDatabases() : ArrayList<DatasetCard>{
-//        val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
-//        val cardList = ArrayList<DatasetCard>()
-//        for (i in 0 until datasetNameList.size) {
-//            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
-//            cardList += newCard
-//        }
-//        return cardList
-//    }
-//}
-
 class DatabaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 //        Log.d("heredude", "yes")

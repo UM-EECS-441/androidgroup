@@ -59,7 +59,10 @@ class TableAdapter {
 //        }
 //        return tableData[position]
 //    }
-
+    fun refreshTable() {
+        tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
+        loadTable()
+    }
 
     /*
     * Loads table in context with id dataDisplayTable with data from the dataset determined by
@@ -68,6 +71,7 @@ class TableAdapter {
     * */
     fun loadTable() {
         //TODO add title row with column names
+        tableView?.removeAllViews()
         var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
         var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
             TableRow.LayoutParams.MATCH_PARENT,

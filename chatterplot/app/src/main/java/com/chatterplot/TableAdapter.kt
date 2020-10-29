@@ -67,9 +67,20 @@ class TableAdapter {
     * */
     fun loadTable() {
         //TODO add title row with column names
+        var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
+        var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+            TableRow.LayoutParams.MATCH_PARENT,
+            TableRow.LayoutParams.WRAP_CONTENT)
+        titleRow.layoutParams = rowLayoutParams
 
-        Log.d("heredude", tableData.keys.toString())
-        //val numRows: Int = tableData[tableData["ID"].size]!!.size  // get size of one key's value to determine number of rows to make
+        var i = 0
+        for ((colKey, _) in tableData) {
+            var tv = titleRow.getChildAt(i) as TextView
+            tv.text = colKey
+            ++i
+        }
+
+
         for (row in 0 until tableData["ID"]!!.size) {
             var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(

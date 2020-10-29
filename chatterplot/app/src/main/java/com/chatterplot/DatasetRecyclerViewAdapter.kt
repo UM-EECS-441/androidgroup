@@ -12,13 +12,19 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.dataset_card.view.*
 
-class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
+class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
             parent, false)
 
         return DatasetViewHolder(itemView)
+    }
+
+    fun addItem(name: String) {
+        val card = DatasetCard(R.drawable.graph_placeholder, name)
+        datasetCardList.add(card)
+        this.notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: DatasetViewHolder, position: Int) {
@@ -42,13 +48,13 @@ class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>)
                     .setCancelable(false)
                     .setPositiveButton("Yes") { dialog, id ->
                         DatabaseHelper(context).deleteTable(currentItem.name)
-
                         val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
                         val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
                         t.show()
-
-                        val intent = Intent(context, MainActivity::class.java)
-                        context.startActivity(intent)
+                        datasetCardList.removeAt(position)
+                        this.notifyItemRemoved(position)
+//                        val intent = Intent(context, MainActivity::class.java)
+//                        context.startActivity(intent)
                     }
                     .setNegativeButton("No") { dialog, id ->
                         // Dismiss the dialog

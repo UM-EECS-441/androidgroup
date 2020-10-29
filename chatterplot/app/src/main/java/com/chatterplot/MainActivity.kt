@@ -19,6 +19,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val RECOGNIZER_REQUEST_CODE = 20
     private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
+    private lateinit var recycler_view: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         val datasetList = getDatabases()
 
+        recycler_view  = findViewById(R.id.recycler_view)
         recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
         recycler_view.layoutManager = LinearLayoutManager(this)
 
@@ -89,12 +92,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getDatabases() : List<DatasetCard>{
+    private fun getDatabases() : ArrayList<DatasetCard>{
         val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
         val cardList = ArrayList<DatasetCard>()
         for (i in 0 until datasetNameList.size) {
             val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
-            cardList += newCard
+            cardList.add(newCard)
         }
         return cardList
     }
@@ -114,6 +117,7 @@ class MainActivity : AppCompatActivity() {
         else if(requestCode == CREATE_REQUEST_CODE) {
             if(resultCode == RESULT_OK || null != data) {
                 val name: String = data!!.getStringExtra("NAME")
+                (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(name)
                 Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }

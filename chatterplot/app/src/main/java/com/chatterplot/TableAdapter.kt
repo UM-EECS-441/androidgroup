@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -67,9 +68,24 @@ class TableAdapter {
     * */
     fun loadTable() {
         //TODO add title row with column names
+        var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
+        var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+            TableRow.LayoutParams.MATCH_PARENT,
+            TableRow.LayoutParams.WRAP_CONTENT)
+        titleRow.layoutParams = rowLayoutParams
 
-        Log.d("heredude", tableData.keys.toString())
-        //val numRows: Int = tableData[tableData["ID"].size]!!.size  // get size of one key's value to determine number of rows to make
+        var i = 0
+        for ((colKey, _) in tableData) {
+            if (colKey != "ID" && colKey != "Timestamp") {
+                var rowNum: TextView = titleRow.getChildAt(i) as TextView
+                rowNum.text = colKey.toString()
+                rowNum.setTypeface(null, Typeface.BOLD)
+                ++i
+            }
+        }
+        (tableView as ViewGroup).addView(titleRow)
+
+
         for (row in 0 until tableData["ID"]!!.size) {
             var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(

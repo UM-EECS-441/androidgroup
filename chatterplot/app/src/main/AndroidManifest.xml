@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".DisplayDataActivity"></activity>
-        <activity android:name=".InsertDataActivity"></activity>
+        <activity android:name=".CreateDatasetActivity"></activity>
+        <activity android:name=".InsertDataActivity" />
         <activity android:name=".DatasetListActivity" />
         <activity android:name=".GraphActivity" />
         <activity android:name=".DatabaseActivity" />
@@ -25,5 +26,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

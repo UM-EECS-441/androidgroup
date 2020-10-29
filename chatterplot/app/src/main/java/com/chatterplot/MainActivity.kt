@@ -10,6 +10,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
@@ -17,17 +18,31 @@ import androidx.core.content.ContextCompat
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_dataset_list.*
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
-    private lateinit var returnedText: TextView
-    private lateinit var recognizerButton: Button
+    private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
+    private lateinit var recycler_view: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_dataset_list)
+
+        val datasetList = getDatabases()
+
+        recycler_view  = findViewById(R.id.recycler_view)
+        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
+        recycler_view.layoutManager = LinearLayoutManager(this)
+
 
         if(ContextCompat.checkSelfPermission(this@MainActivity,
             Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -39,8 +54,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-        returnedText = findViewById(R.id.textView)
-        recognizerButton = findViewById<Button>(R.id.recognizerButton)
+        val recognizerButton = findViewById<FloatingActionButton>(R.id.recognizerButton)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -51,10 +65,41 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         }
 
-        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
-        createDatasetButton.setOnClickListener { view ->
-            showCreateDialog(view)
+//        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
+//        createDatasetButton.setOnClickListener { view ->
+//            showCreateDialog(view)
+//        }
+
+        val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
+        bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when(menuItem.itemId) {
+                R.id.search_dataset -> {
+                    Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
+                    true
+                }
+                R.id.create_dataset -> {
+                    val intent = Intent(this, CreateDatasetActivity::class.java)
+                    startActivityForResult(intent, CREATE_REQUEST_CODE)
+//                    showCreateDialog(null)
+                    true
+                }
+                R.id.setting_dataset -> {
+                    showAllDatabase(null)
+                    true
+                }
+                else -> false
+            }
         }
+    }
+
+    private fun getDatabases() : ArrayList<DatasetCard>{
+        val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
+        val cardList = ArrayList<DatasetCard>()
+        for (i in 0 until datasetNameList.size) {
+            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
+            cardList.add(newCard)
+        }
+        return cardList
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -67,6 +112,13 @@ class MainActivity : AppCompatActivity() {
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
                 speechProcessor.textProcessing(res[0])
+            }
+        }
+        else if(requestCode == CREATE_REQUEST_CODE) {
+            if(resultCode == RESULT_OK || null != data) {
+                val name: String = data!!.getStringExtra("NAME")
+                (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(name)
+                Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -82,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showCreateDialog(v: View) {
+    fun showCreateDialog(v: View?) {
         val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
         val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
         val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
@@ -107,12 +159,12 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun showGraph(v: View) {
+    fun showGraph(v:View?) {
         val intent = Intent(this, GraphActivity::class.java)
         startActivity(intent)
     }
 
-    fun startEditor(v:View?) {
+    fun showDatasetList(v:View?) {
         val intent = Intent(this, DatasetListActivity::class.java)
         startActivity(intent)
     }

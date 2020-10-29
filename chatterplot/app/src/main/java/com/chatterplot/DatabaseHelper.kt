@@ -98,8 +98,8 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
                 if(col == "Timestamp") {
                     val timestamp = cursor.getFloat(cursor.getColumnIndex(col)).toLong()
 //                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
-                    val cal = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
-                    resultDict[col]!!.add(cal)
+//                    val cal = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    resultDict[col]!!.add(timestamp)
                 }
                 else {
                     resultDict[col]!!.add(cursor.getString(cursor.getColumnIndex(col)))

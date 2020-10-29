@@ -27,7 +27,9 @@ class DisplayDataActivity : AppCompatActivity() {
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
             when(menuItem.itemId) {
                 R.id.graph_dataset -> {
-                    Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
+                    val intent = Intent(this, GraphActivity::class.java)
+                    intent.putExtra("DATASETNAME", tableName)
+                    startActivity(intent)
                     true
                 }
                 R.id.create_dataset -> {
@@ -37,7 +39,7 @@ class DisplayDataActivity : AppCompatActivity() {
                     true
                 }
                 R.id.setting_dataset -> {
-
+                    Toast.makeText(this, "Setting not implemented yet", Toast.LENGTH_LONG).show()
                     true
                 }
                 else -> false

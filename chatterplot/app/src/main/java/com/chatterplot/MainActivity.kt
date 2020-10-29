@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun startEditor(v:View?) {
+    fun showDatasetList(v:View?) {
         val intent = Intent(this, DatasetListActivity::class.java)
         startActivity(intent)
     }

@@ -12,7 +12,8 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.dataset_card.view.*
 
-class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
+
+open class DatasetRecyclerViewAdapter(private val datasetCardList: List<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
@@ -34,8 +35,14 @@ class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetC
         holder.textView.text = currentItem.name
         val context = holder.itemView.context
 
-        holder.itemView.setOnClickListener {
+        holder.itemView.editButton.setOnClickListener {
             val intent = Intent(context, InsertDataActivity::class.java)
+            intent.putExtra("DATASETNAME", currentItem.name)
+            context.startActivity(intent)
+        }
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, DisplayDataActivity::class.java)
             intent.putExtra("DATASETNAME", currentItem.name)
             context.startActivity(intent)
         }

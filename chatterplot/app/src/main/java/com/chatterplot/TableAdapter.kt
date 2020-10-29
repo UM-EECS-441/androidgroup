@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -19,13 +20,17 @@ import androidx.core.view.setPadding
 
 
 class TableAdapter {
-    var columnData = mutableListOf<Int>() // data will be preloaded into this list from the db
-    var tableView: TableLayout? = null
+    private lateinit var tableData: MutableMap<String, ArrayList<Any>> // data will be preloaded into this list from the db
+    private var tableView: TableLayout? = null
     var context: Context? = null
+    private lateinit var tableNameDB: String
 
-    constructor(context: Context, pathDB: String, tableNameDB: String) {
+    constructor(context: Context, tableNameDB: String) {
         this.context = context
+        this.tableNameDB = tableNameDB
         tableView = (this.context as DisplayDataActivity).findViewById<TableLayout>(R.id.dataDisplayTable)
+
+        tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
 //        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
 //
 //        val pullDataQuery: String = ""  //TODO write the actual query dependent on schema
@@ -36,9 +41,9 @@ class TableAdapter {
 //        // retrieve data from cursor and preload into MutableList for easier manipulation and
 //        // quicker retrieval
 //        dataCursor.moveToFirst()
-//        columnData.add(dataCursor.getInt(0))  //get col 0
+//        tableData.add(dataCursor.getInt(0))  //get col 0
 //        while (dataCursor.moveToNext()) {
-//            columnData.add(dataCursor.getInt(0))
+//            tableData.add(dataCursor.getInt(0))
 //        }
     }
 
@@ -48,12 +53,12 @@ class TableAdapter {
     * currently, our datasets only hold single-column numerical data
     *
     * */
-    fun getItem(position: Int): Int? {
-        if (position >= columnData.size) {
-            return null
-        }
-        return columnData[position]
-    }
+//    fun getItem(position: Int): Int? {
+//        if (position >= tableData.size) {
+//            return null
+//        }
+//        return tableData[position]
+//    }
 
 
     /*
@@ -62,31 +67,50 @@ class TableAdapter {
     *
     * */
     fun loadTable() {
-        //TESTING TABLEADAPTER
-        for (i in 10 until 111) {
-            columnData.add(i)
+        //TODO add title row with column names
+        var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
+        var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+            TableRow.LayoutParams.MATCH_PARENT,
+            TableRow.LayoutParams.WRAP_CONTENT)
+        titleRow.layoutParams = rowLayoutParams
+
+        var i = 0
+        for ((colKey, _) in tableData) {
+            if (colKey != "ID" && colKey != "Timestamp") {
+                var rowNum: TextView = titleRow.getChildAt(i) as TextView
+                rowNum.text = colKey.toString()
+                rowNum.setTypeface(null, Typeface.BOLD)
+                ++i
+            }
         }
+        (tableView as ViewGroup).addView(titleRow)
 
-        //END TESTING
 
-        for (row in 0 until columnData.size) {
-            var newRow: TableRow = createTableRow(3)
+        for (row in 0 until tableData["ID"]!!.size) {
+            var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
+            newRow.layoutParams = rowLayoutParams
 
-            //show row number in table
-            var rowNum:TextView = newRow.getChildAt(0) as TextView
-            rowNum.text = row.toString()
-
-            //data value
-            var item: TextView = newRow.getChildAt(1) as TextView
-            item.text = columnData[row].toString()
+            var colNum: Int = 0
+            for ((colKey, colData) in tableData) {
+                if (colKey != "ID" && colKey != "Timestamp") {
+                    var rowNum: TextView = newRow.getChildAt(colNum) as TextView
+                    rowNum.text = colData[row].toString()
+                    ++colNum
+                }
+            }
             (tableView as ViewGroup).addView(newRow)
 
-            //for (item in 0 until (newRow as ViewGroup).childCount) {
+            //show row number in table
+//            var rowNum:TextView = newRow.getChildAt(0) as TextView
+//            rowNum.text = row.toString()
+//
+//            //data value
+//            var item: TextView = newRow.getChildAt(1) as TextView
+//            item.text = tableData[row].toString()
 
-            //}
         }
     }
 

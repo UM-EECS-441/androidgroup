@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -77,6 +78,7 @@ class TableAdapter {
         for ((colKey, _) in tableData) {
             var tv = titleRow.getChildAt(i) as TextView
             tv.text = colKey
+            tv.setTypeface(null, Typeface.BOLD)
             ++i
         }
 

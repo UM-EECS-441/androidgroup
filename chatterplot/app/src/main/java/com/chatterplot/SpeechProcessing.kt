@@ -66,7 +66,7 @@ class SpeechProcessor(ctext: Context) {
             // Run create dataset function
             try {
                 val schema = Schema(name)
-                schema.addColumn("X", "INT")
+                schema.addColumn("Y", "INT")
                 DatabaseHelper(context).createTable(schema)
             } catch(e:Exception) {
                 return false

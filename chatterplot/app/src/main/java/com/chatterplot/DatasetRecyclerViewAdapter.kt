@@ -57,8 +57,9 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
                         val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
                         t.show()
+
                         datasetCardList.remove(currentItem)
-                        this.notifyItemRemoved(position)
+                        this.notifyDataSetChanged()
 //                        val intent = Intent(context, MainActivity::class.java)
 //                        context.startActivity(intent)
                     }

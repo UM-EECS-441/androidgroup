@@ -7,14 +7,16 @@ import android.widget.Toast
 
 class SpeechProcessor(ctext: Context) {
     var context = ctext
-    lateinit var name: String
+    var name = "Dataset"
 
-    fun textProcessing(text: String) {
+    fun textProcessing(text: String):Boolean {
         if (this.createDataset(text)) {
             Log.i("SpeechRecognizer","created dataset")
+            return true
         } else {
             Log.i("SpeechRecognizer","command not recognized")
             Toast.makeText(context, "Command not recognized", Toast.LENGTH_SHORT).show()
+            return false
         }
     }
 

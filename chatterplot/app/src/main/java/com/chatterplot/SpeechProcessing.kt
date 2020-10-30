@@ -53,6 +53,7 @@ class SpeechProcessor(ctext: Context) {
                 Log.i("SpeechRecognizer", "text response word: ".plus(word))
                 if (word == "called" || word == "named" || word == "titled" || word == "name") {
                     val idx = text.indexOf(word) + word.length + 1
+//                    if(idx >= text.size) return false
                     name = text.substring(idx)
                     break
                 }
@@ -64,7 +65,9 @@ class SpeechProcessor(ctext: Context) {
             Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
             // Run create dataset function
             try {
-                DatabaseHelper(context).createDataset(name, "X", "Y")
+                val schema = Schema(name)
+                schema.addColumn("X", "INT")
+                DatabaseHelper(context).createTable(schema)
             } catch(e:Exception) {
                 return false
             }

@@ -54,6 +54,7 @@ class GraphActivity : AppCompatActivity() {
             .backgroundColor("#FFFFFF")
             .dataLabelsEnabled(true)
             .series(graphData.toTypedArray())
+            .xAxisLabelsEnabled(false)
 //            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
     }

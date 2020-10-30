@@ -49,11 +49,14 @@ class SpeechProcessor(ctext: Context) {
             name = " "
             for (word in text.split(" ")) {
                 Log.i("SpeechRecognizer", "text response word: ".plus(word))
-                if (word == "called" || word == "named" || word == "titled") {
-                    var idx = text.indexOf(word) + word.length + 1
+                if (word == "called" || word == "named" || word == "titled" || word == "name") {
+                    val idx = text.indexOf(word) + word.length + 1
                     name = text.substring(idx)
                     break
                 }
+            }
+            if(name == " ") {
+                return false
             }
             Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
             Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()

@@ -48,7 +48,6 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
         }
 
         holder.itemView.deleteDatasetButton.setOnClickListener {
-
             val builder = AlertDialog.Builder(context)
             val deleteMessage = "Are you sure you want to delete " + currentItem.name + "?"
             builder.setMessage(deleteMessage)
@@ -58,7 +57,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         val toastString = "Dataset \"" + currentItem.name + "\" Deleted"
                         val t = Toast.makeText(context, toastString, Toast.LENGTH_LONG)
                         t.show()
-                        datasetCardList.removeAt(position)
+                        datasetCardList.remove(currentItem)
                         this.notifyItemRemoved(position)
 //                        val intent = Intent(context, MainActivity::class.java)
 //                        context.startActivity(intent)

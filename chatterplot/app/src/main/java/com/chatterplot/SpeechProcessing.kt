@@ -53,7 +53,7 @@ class SpeechProcessor(ctext: Context) {
                 Log.i("SpeechRecognizer", "text response word: ".plus(word))
                 if (word == "called" || word == "named" || word == "titled" || word == "name") {
                     val idx = text.indexOf(word) + word.length + 1
-//                    if(idx >= text.size) return false
+                    if(idx >= text.length) return false
                     name = text.substring(idx)
                     break
                 }

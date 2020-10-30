@@ -54,7 +54,7 @@ class SpeechProcessor(ctext: Context) {
                 if (word == "called" || word == "named" || word == "titled" || word == "name") {
                     val idx = text.indexOf(word) + word.length + 1
                     if(idx >= text.length) return false
-                    name = text.substring(idx)
+                    name = text.substring(idx).capitalize()
                     break
                 }
             }

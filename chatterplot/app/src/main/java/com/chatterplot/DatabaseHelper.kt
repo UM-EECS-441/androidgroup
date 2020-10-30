@@ -35,7 +35,8 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     private fun updateTimestamp(tableName: String) {
         val db = this.writableDatabase
         val sqlval = ContentValues()
-        sqlval.put("Timestamp", System.currentTimeMillis() / 1000)
+//        sqlval.put("Timestamp", System.currentTimeMillis() / 1000.0)
+        sqlval.put("Timestamp", Instant.now().toEpochMilli())
         db.update("DATASET", sqlval, "TableName='${tableName}'", null)
     }
 
@@ -59,9 +60,13 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         for(i in 0 until values.size) {
             sqlval.put("[${colNames[i+1]}]", values[i])
         }
-        sqlval.put("Timestamp", System.currentTimeMillis()/1000)
+//        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
+        val time = Instant.now().toEpochMilli()
+        Log.e("Time", time.toString())
+        sqlval.put("Timestamp", time)
         val db = this.writableDatabase
         db.insertOrThrow("[$tableName]", null, sqlval)
+        Log.e("sql", getTable(tableName).toString())
         updateTimestamp(tableName)
     }
 
@@ -96,7 +101,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         while(cursor.moveToNext()) {
             for (col in colNames) {
                 if(col == "Timestamp") {
-                    val timestamp = cursor.getFloat(cursor.getColumnIndex(col)).toLong()
+                    val timestamp = cursor.getDouble(cursor.getColumnIndex(col))
 //                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
 //                    val cal = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
                     resultDict[col]!!.add(timestamp)
@@ -123,10 +128,11 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         for (idx in 0 until schema.columns.size) {
             sqlQuery += "[${schema.columns[idx].first}] ${schema.columns[idx].second}, "
         }
-        sqlQuery += "Timestamp FLOAT)"
+        sqlQuery += "Timestamp DOUBLE)"
         db.execSQL(sqlQuery)
+        val time = Instant.now().toEpochMilli()
         // Insert to the table that keeps track of all data sets
-        db.execSQL("INSERT INTO DATASET (TableName, Timestamp) VALUES ('${schema.name}', ${System.currentTimeMillis() / 1000})")
+        db.execSQL("INSERT INTO DATASET (TableName, Timestamp) VALUES ('${schema.name}', ${time})")
     }
 
     fun deleteTable(tableName: String) {

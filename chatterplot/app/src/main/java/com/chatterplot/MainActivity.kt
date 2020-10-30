@@ -1,5 +1,6 @@
 package com.chatterplot
 
+
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,22 +10,39 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import android.widget.Button
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_dataset_list.*
 
-class MainActivity : AppCompatActivity(), RecognitionListener {
+class MainActivity : AppCompatActivity() {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
-    private lateinit var returnedText: TextView
-    private lateinit var recognizerButton: Button
-//    private lateinit var progressBar: ProgressBar
-    private lateinit var speech: SpeechRecognizer
+    private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
+    private lateinit var recycler_view: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_dataset_list)
+
+        val datasetList = getDatabases()
+
+        recycler_view  = findViewById(R.id.recycler_view)
+        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
+        recycler_view.layoutManager = LinearLayoutManager(this)
+
 
         if(ContextCompat.checkSelfPermission(this@MainActivity,
             Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -36,13 +54,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             )
         }
 
-        returnedText = findViewById(R.id.textView)
-        recognizerButton = findViewById<Button>(R.id.recognizerButton)
-//        progressBar = findViewById(R.id.progressBar)
-
-        speech = SpeechRecognizer.createSpeechRecognizer(this)
-        Log.i("SpeechRecognizer","isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
-        speech.setRecognitionListener(this)
+        val recognizerButton = findViewById<FloatingActionButton>(R.id.recognizerButton)
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "US-en")
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -53,44 +65,41 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         }
 
-//        setOnCheckedChangeListener { _, isChecked ->
-//            if (isChecked) {
-////                progressBar.visibility = View.VISIBLE
-////                progressBar.isIndeterminate = true
-//                startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
-////                speech.startListening(recognizerIntent)
-////                Log.i("SpeechRecognizer","Asking Record Audio permission")
-////                ActivityCompat.requestPermissions(this@MainActivity,
-////                    arrayOf(Manifest.permission.RECORD_AUDIO),
-////                    permission)
-//            } else {
-////                progressBar.isIndeterminate = false
-////                progressBar.visibility = View.VISIBLE
-////                speech.stopListening()
-//                Log.i("SpeechRecognizer","stop listening")
-//            }
+//        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
+//        createDatasetButton.setOnClickListener { view ->
+//            showCreateDialog(view)
 //        }
+
+        val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
+        bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when(menuItem.itemId) {
+                R.id.search_dataset -> {
+                    Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
+                    true
+                }
+                R.id.create_dataset -> {
+                    val intent = Intent(this, CreateDatasetActivity::class.java)
+                    startActivityForResult(intent, CREATE_REQUEST_CODE)
+//                    showCreateDialog(null)
+                    true
+                }
+                R.id.setting_dataset -> {
+                    showAllDatabase(null)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
-    private fun textProcessing(text: String) {
-        if ((text.contains("make") || text.contains("create")) && text.contains("data")) {
-            var name = " "
-            for (word in text.split(" ")) {
-                Log.i("SpeechRecognizer", "text response word: ".plus(word))
-                if (word == "name") {
-                    var idx = text.indexOf("name") + 5
-                    name = text.substring(idx)
-                    break
-                } else if (word == "named") {
-                    var idx = text.indexOf("named") + 6
-                    name = text.substring(idx)
-                    break
-                }
-            }
-            Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
-            Toast.makeText(this, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
-            // Run create dataset function
+    private fun getDatabases() : ArrayList<DatasetCard>{
+        val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
+        val cardList = ArrayList<DatasetCard>()
+        for (i in 0 until datasetNameList.size) {
+            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
+            cardList.add(newCard)
         }
+        return cardList
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -98,10 +107,20 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         if(requestCode == RECOGNIZER_REQUEST_CODE) {
             if(resultCode == RESULT_OK || null != data) {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                val textView = findViewById<TextView>(R.id.textView)
-                textView.text = res[0]
+//                val textView = findViewById<TextView>(R.id.textView)
+//                textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
-                textProcessing(res[0])
+                val speechProcessor = SpeechProcessor(this)
+                if (speechProcessor.textProcessing(res[0])) {
+                    (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name)
+                }
+            }
+        }
+        else if(requestCode == CREATE_REQUEST_CODE) {
+            if(resultCode == RESULT_OK || null != data) {
+                val name: String = data!!.getStringExtra("NAME")
+                (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(name)
+                Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -115,80 +134,40 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 finish()
             }
         }
-//        when (requestCode) {
-//            permission -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager
-//                    .PERMISSION_GRANTED) {
-//                Log.i("SpeechRecognizer","Permission Granted, start listening")
-//                speech.startListening(recognizerIntent)
-//            } else {
-//                Toast.makeText(this@MainActivity, "Permission Denied!",
-//                    Toast.LENGTH_SHORT).show()
-//            }
+    }
+
+//    fun showCreateDialog(v: View?) {
+//        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
+//        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
+//        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
+//        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
+//
+//        val alertDialog = AlertDialog.Builder(this)
+//        alertDialog.setTitle("Create new dataset")
+//        alertDialog.setView(createDialog)
+//        alertDialog.setNegativeButton("Cancel", null)
+//        alertDialog.setPositiveButton("Create")  {dialog, which ->
+//            val tableName = datasetName.text.toString()
+//            val xAxis = datasetIndependent.text.toString()
+//            val yAxis = datasetDependent.text.toString()
+//            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
+//
 //        }
+//        alertDialog.create().show()
+//    }
+
+    fun showAllDatabase(v:View?) {
+        val intent = Intent(this, DatabaseActivity::class.java)
+        startActivity(intent)
     }
 
-    override fun onReadyForSpeech(params: Bundle?) {
-        TODO("Not yet implemented")
+    fun showGraph(v:View?) {
+        val intent = Intent(this, GraphActivity::class.java)
+        startActivity(intent)
     }
 
-    override fun onRmsChanged(rmsdB: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBufferReceived(buffer: ByteArray?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPartialResults(partialResults: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onBeginningOfSpeech() {
-        Log.i("SpeechRecognizer", "onBeginningOfSpeech")
-//        progressBar.isIndeterminate = false
-//        progressBar.max = 10
-    }
-    override fun onEndOfSpeech() {
-//        progressBar.isIndeterminate = true
-        Log.i("SpeechRecognizer", "onEndOfSpeech")
-//        toggleButton.isChecked = false
-    }
-
-    override fun onError(error: Int) {
-        val errorMessage: String = getErrorText(error)
-        Log.d("SpeechRecognizer", "FAILED $errorMessage")
-        returnedText.text = errorMessage
-//        toggleButton.isChecked = false
-    }
-
-    private fun getErrorText(error: Int): String {
-        var message = ""
-        message = when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client side error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
-            SpeechRecognizer.ERROR_SERVER -> "error from server"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-            else -> "Didn't understand, please try again."
-        }
-        return message
-    }
-
-    override fun onResults(results: Bundle?) {
-        Log.i("SpeechRecognizer", "onResults")
-        val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        var text = ""
-        if (matches != null) {
-            for (result in matches) text = result.trimIndent()
-        }
-        returnedText.text = text
+    fun showDatasetList(v:View?) {
+        val intent = Intent(this, DatasetListActivity::class.java)
+        startActivity(intent)
     }
 }

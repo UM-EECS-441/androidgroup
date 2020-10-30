@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    android:backgroundTint="#68C1EA"
+    android:backgroundTint="@color/colorPrimary"
     app:cardCornerRadius="8dp">
 
     <RelativeLayout
@@ -24,10 +24,11 @@
             android:id="@+id/dataset_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/dataset_graph_preview"
+            android:layout_alignBottom="@+id/editButton"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="8dp"
-            android:textColor="#000000"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="8dp"
+            android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -37,8 +38,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"
             android:background="@android:color/transparent"
-            app:srcCompat="@android:drawable/ic_menu_delete" />
+            android:src="@drawable/delete_icon" />
 
         <Button
             android:id="@+id/editButton"
@@ -47,6 +50,7 @@
             android:layout_below="@+id/dataset_graph_preview"
             android:layout_alignParentRight="true"
             android:layout_marginTop="8dp"
+            android:backgroundTint="#FFFFFF"
             android:text="Insert" />
 
     </RelativeLayout>

@@ -26,6 +26,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@drawable/white_mic_icon"
         android:id="@+id/recognizerButton"
         app:layout_anchor="@id/bottom_app_bar" />
 

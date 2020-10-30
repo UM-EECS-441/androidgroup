@@ -7,10 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -28,12 +25,12 @@ class CreateDatasetActivity : AppCompatActivity() {
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
 
-        val addButton = findViewById<ExtendedFloatingActionButton>(R.id.add_column_button)
+        val addButton = findViewById<Button>(R.id.add_column_button)
         addButton.setOnClickListener { v ->
             addColumn(v)
         }
 
-        val createButton = findViewById<ExtendedFloatingActionButton>(R.id.create_dataset)
+        val createButton = findViewById<Button>(R.id.create_dataset)
         createButton.setOnClickListener { _ ->
             createDataset()
         }

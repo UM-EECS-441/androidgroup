@@ -136,25 +136,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showCreateDialog(v: View?) {
-        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
-        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
-        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
-        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
-
-        val alertDialog = AlertDialog.Builder(this)
-        alertDialog.setTitle("Create new dataset")
-        alertDialog.setView(createDialog)
-        alertDialog.setNegativeButton("Cancel", null)
-        alertDialog.setPositiveButton("Create")  {dialog, which ->
-            val tableName = datasetName.text.toString()
-            val xAxis = datasetIndependent.text.toString()
-            val yAxis = datasetDependent.text.toString()
-            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
-
-        }
-        alertDialog.create().show()
-    }
+//    fun showCreateDialog(v: View?) {
+//        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
+//        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
+//        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
+//        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
+//
+//        val alertDialog = AlertDialog.Builder(this)
+//        alertDialog.setTitle("Create new dataset")
+//        alertDialog.setView(createDialog)
+//        alertDialog.setNegativeButton("Cancel", null)
+//        alertDialog.setPositiveButton("Create")  {dialog, which ->
+//            val tableName = datasetName.text.toString()
+//            val xAxis = datasetIndependent.text.toString()
+//            val yAxis = datasetDependent.text.toString()
+//            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
+//
+//        }
+//        alertDialog.create().show()
+//    }
 
     fun showAllDatabase(v:View?) {
         val intent = Intent(this, DatabaseActivity::class.java)

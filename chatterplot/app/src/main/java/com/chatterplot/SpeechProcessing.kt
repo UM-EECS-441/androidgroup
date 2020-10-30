@@ -65,9 +65,7 @@ class SpeechProcessor(ctext: Context) {
             Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
             // Run create dataset function
             try {
-                val schema = Schema(name)
-                schema.addColumn("Y", "INT")
-                DatabaseHelper(context).createTable(schema)
+                DatabaseHelper(context).createDataset(name, arrayListOf("Y"))
             } catch(e:Exception) {
                 return false
             }

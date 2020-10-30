@@ -110,10 +110,11 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return resultDict
     }
 
-    fun createDataset(tableName: String, xAxis: String, yAxis: String) {
+    fun createDataset(tableName: String, columns: ArrayList<String>) {
         val schema = Schema(tableName)
-        schema.addColumn(xAxis, "Int")
-        schema.addColumn(yAxis, "Int")
+        for (column in columns) {
+            schema.addColumn(column, "INT")
+        }
         this.createTable(schema)
     }
 

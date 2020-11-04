@@ -159,7 +159,7 @@ class CreateDatasetActivity : AppCompatActivity() {
                 }
 
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "text/*"
+                    type = "text/csv"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TEXT, "Choose a file to import")
                 }

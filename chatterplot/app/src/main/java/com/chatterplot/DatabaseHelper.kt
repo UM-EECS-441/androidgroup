@@ -66,7 +66,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         sqlval.put("Timestamp", time)
         val db = this.writableDatabase
         db.insertOrThrow("[$tableName]", null, sqlval)
-        Log.e("sql", getTable(tableName).toString())
+//        Log.e("sql", getTable(tableName).toString())
         updateTimestamp(tableName)
     }
 

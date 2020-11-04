@@ -13,16 +13,6 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AASeries
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAXAxis
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.Description
-import com.github.mikephil.charting.components.MarkerView
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 
 class GraphActivity : AppCompatActivity() {
     private lateinit var tableName:String
@@ -108,11 +98,11 @@ class GraphActivity : AppCompatActivity() {
 //    }
 }
 
-class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormatter() {
-    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-        return axisLabel[value.toInt()]
-    }
-}
+//class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormatter() {
+//    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+//        return axisLabel[value.toInt()]
+//    }
+//}
 
 //class BarChartSelectedListener : OnChartValueSelectedListener {
 //    override fun onValueSelected(e: Entry?, h: Highlight?) {

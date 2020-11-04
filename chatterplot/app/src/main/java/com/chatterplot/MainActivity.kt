@@ -160,6 +160,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun showSettings(v: View?) {
+        val intent = Intent(this, SettingActivity::class.java)
+        startActivity(intent)
+    }
+
     fun showGraph(v:View?) {
         val intent = Intent(this, GraphActivity::class.java)
         startActivity(intent)

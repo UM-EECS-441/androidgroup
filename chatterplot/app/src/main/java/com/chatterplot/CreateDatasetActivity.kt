@@ -159,24 +159,7 @@ class CreateDatasetActivity : AppCompatActivity() {
             schema.addColumn(colName, "INT")
         }
         DatabaseHelper(this).createTable(schema)
-//        else {
-//            inputColumn = ArrayList<String>()
-//            for(column in columns) {
-//                val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
-//                if(colName == "") {
-//                    Toast.makeText(this, "Names of columns must be specified", Toast.LENGTH_LONG).show()
-//                    return
-//                }
-//                inputColumn.add(colName)
-//            }
-//            if(name != "Imported") {
-//                inputName = name
-//                if(isImporting == 2) {
-//                    db.changeDatabaseName("Imported", name)
-//                }
-//            }
-//            db.changeDatabaseColumn("Imported", colNames)
-//        }
+
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)
         setResult(Activity.RESULT_OK, resultIntent)
@@ -282,7 +265,7 @@ class CreateDatasetActivity : AppCompatActivity() {
 //    }
 
     private fun parseCSV(uri: Uri?) {
-        if(uri == null) return
+        if (uri == null) return
 //        val docId = DocumentsContract.getDocumentId(uri)
 //        Log.e("docId", docId)
         val file = contentResolver.openInputStream(uri)!!
@@ -291,22 +274,23 @@ class CreateDatasetActivity : AppCompatActivity() {
 
         val tableName = "Imported"
         val _columns = reader.readLine().split(",")
-        if(_columns.size >= 5) {
-            Toast.makeText(this, "Dataset cannot have more than 5 columns", Toast.LENGTH_LONG).show()
+        if (_columns.size >= 5) {
+            Toast.makeText(this, "Dataset cannot have more than 5 columns", Toast.LENGTH_LONG)
+                .show()
         }
         val schema = Schema(tableName)
-        for((idx,column) in _columns.withIndex()) {
-            if(idx == 0) {
+        for ((idx, column) in _columns.withIndex()) {
+            if (idx == 0) {
                 runOnUiThread {
                     findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
                 }
-            }
-            else if(idx < columns.size) {
+            } else if (idx < columns.size) {
                 runOnUiThread {
-                    columns[idx].findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
+                    columns[idx].findViewById<TextInputLayout>(R.id.column_input).editText?.setText(
+                        column
+                    )
                 }
-            }
-            else {
+            } else {
                 runOnUiThread {
                     val input = constructInputField(false)
                     input.findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
@@ -315,7 +299,7 @@ class CreateDatasetActivity : AppCompatActivity() {
             }
             schema.addColumn(column, "INT")
         }
-        for(idx in _columns.size until columns.size) {
+        for (idx in  columns.size-1 downTo _columns.size) {
             runOnUiThread { deleteInputField(idx) }
         }
         //TODO: Couldn't rename column name in current version of sqlite
@@ -329,110 +313,10 @@ class CreateDatasetActivity : AppCompatActivity() {
 //        }
         inputColumn = ArrayList()
         var line = reader.readLine()
-        while(line != null) {
+        while (line != null) {
             inputColumn.add(ArrayList(line.split(",")))
             line = reader.readLine()
         }
         isImporting = 2
-
-//        val resultIntent = Intent()
-//        resultIntent.putExtra("NAME", "Imported")
-//        setResult(Activity.RESULT_OK, resultIntent)
-//        finish()
-
-
-//        when(uri.authority) {
-//            // External Storage
-//            "com.android.externalstorage.documents" -> {
-//                val file = contentResolver.openInputStream(uri)
-//                val reader = BufferedReader(InputStreamReader(file))
-//                var line = reader.readLine()
-//                while(line != null) {
-//                    Log.e("line", line.toString())
-//                    line = reader.readLine()
-//                }
-                // TODO Implement
-//                val selectionMime = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
-//                val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("jpg")
-//                contentResolver.query(
-//                    MediaStore.Files.getContentUri("external"),
-//                    null,
-//                    selectionMime,
-//                    arrayOf(mimeType),
-//                    null
-//                )?.use { cursor ->
-//                    while (cursor.moveToNext()) {
-//                        val temp = cursor.getString(cursor.getColumnIndexOrThrow("_data"))
-//                        Log.e("Downloads", temp)
-//                    }
-//                }
-////                val path = docId.split(":")
-////                if("primary".equals(path[0], true)) {
-////                    val down = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-////                    return "${getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)}/${path[1]}"
-////                }
-//                return getDataColumn(uri, null, null)
-//            }
-            // Download
-//            "com.android.providers.downloads.documents" -> {
-                // TODO Implement
-//                val contentUri = ContentUris.withAppendedId(
-//                    Uri.parse("content://downloads/public_downloads"),
-//                    docId.toLong()
-//                )
-//                return getDataColumn(contentUri, null, null)
-//            }
-            // Google Drive
-//            "com.google.android.apps.docs.storage" -> {
-//                val cursor = contentResolver?.query(uri, null, null, null, null, null)
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    val displayName = cursor.getString(
-//                        cursor.getColumnIndex("_data")
-//                    )
-//                    Log.e("display", displayName)
-//                }
-//                val file = contentResolver.openInputStream(uri)!!
-//                val reader = BufferedReader(InputStreamReader(file))
-//
-//                val tableName = "Imported"
-//                val columns = reader.readLine().split(",")
-//                val schema = Schema(tableName)
-//                for(column in columns) {
-//                    schema.addColumn(column, "INT")
-//                }
-//                val db = DatabaseHelper(this)
-//                db.createTable(schema)
-//
-//                var line = reader.readLine()
-//                while(line != null) {
-//                    Log.e("Line", line)
-//                    db.insertRow(tableName, ArrayList(line.split(",")))
-//                    line = reader.readLine()
-//                }
-//            }
-//        }
     }
-
-//    private fun getDataColumn(uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
-//        contentResolver?.query(uri, arrayOf("_data"), selection, selectionArgs, null)?.use {
-//            if(it.moveToFirst()) {
-//                return it.getString(it.getColumnIndexOrThrow("_data"))
-//            }
-//        }
-//        return null
-//        var cursor: Cursor? = null
-//        var column = "_data"
-//        val projection = arrayOf(column)
-//        try {
-//            if(uri == null) return null
-//            cursor = context.contentResolver.query(uri, projection, selection , selectionArgs, null)
-//            if(cursor != null && cursor.moveToFirst()) {
-//                val index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
-//                return cursor.getString(index)
-//            }
-//        } finally {
-//            cursor?.close()
-//        }
-//        return null
-//    }
 }

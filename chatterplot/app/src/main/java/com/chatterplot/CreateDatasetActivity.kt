@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.ConditionVariable
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
@@ -18,13 +19,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.MimeTypeMap
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -40,6 +40,13 @@ class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private val READ_PERMISSION = 20
     private val IMPORT_REQUEST = 10
+    private var inputName = "Imported"
+//    private lateinit var inputColumnLabel: ArrayList<String>
+    private lateinit var inputColumn: ArrayList<ArrayList<String>>
+    // 0 = not importing, 1 = importing in process, 2 = importing done
+    var isImporting = 0
+    val importingProcess = ConditionVariable(true)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_dataset)
@@ -56,6 +63,16 @@ class CreateDatasetActivity : AppCompatActivity() {
         createButton.setOnClickListener { _ ->
             createDataset()
         }
+    }
+
+    private fun addView(inputField: View) {
+        val inputs = findViewById<ConstraintLayout>(R.id.create_input_fields)
+        val setter = ConstraintSet()
+        inputs.addView(inputField)
+        setter.clone(inputs)
+        setter.connect(inputField.id, ConstraintSet.TOP, columns.last().id, ConstraintSet.BOTTOM, 0)
+        setter.applyTo(inputs)
+        columns.add(inputField)
     }
 
     private fun addColumn(view: View?) {
@@ -81,19 +98,25 @@ class CreateDatasetActivity : AppCompatActivity() {
 //            .show()
     }
 
-    private fun constructInputField(): View? {
+    private fun constructInputField(isDeletable: Boolean=true): View {
         val inflater = LayoutInflater.from(this)
         val layout = inflater.inflate(R.layout.column_input_field, null, false)
         layout.id = View.generateViewId()
         val textInput = layout.findViewById<TextInputLayout>(R.id.column_input)
         textInput.hint = "Column ${columns.size+1}"
         val deleteBtn = layout.findViewById<ImageButton>(R.id.delete_button)
-        deleteBtn.tag = columns.size
-        deleteBtn.setOnClickListener { v ->
-            deleteInputField(v.tag as Int)
+        if(!isDeletable) {
+            deleteBtn.visibility = View.INVISIBLE
+        }
+        else {
+            deleteBtn.tag = columns.size
+            deleteBtn.setOnClickListener { v ->
+                deleteInputField(v.tag as Int)
+            }
         }
         return layout
     }
+
 
     private fun deleteInputField(tag: Int) {
         if(columns.size == 1 || tag >= columns.size) return
@@ -136,10 +159,43 @@ class CreateDatasetActivity : AppCompatActivity() {
             schema.addColumn(colName, "INT")
         }
         DatabaseHelper(this).createTable(schema)
+//        else {
+//            inputColumn = ArrayList<String>()
+//            for(column in columns) {
+//                val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
+//                if(colName == "") {
+//                    Toast.makeText(this, "Names of columns must be specified", Toast.LENGTH_LONG).show()
+//                    return
+//                }
+//                inputColumn.add(colName)
+//            }
+//            if(name != "Imported") {
+//                inputName = name
+//                if(isImporting == 2) {
+//                    db.changeDatabaseName("Imported", name)
+//                }
+//            }
+//            db.changeDatabaseColumn("Imported", colNames)
+//        }
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)
         setResult(Activity.RESULT_OK, resultIntent)
-        finish()
+        when(isImporting) {
+            0 -> {
+                finish()
+            }
+            else -> {
+                progressBar.visibility = View.GONE
+                findViewById<Button>(R.id.create_dataset).visibility = View.GONE
+                findViewById<CoordinatorLayout>(R.id.main_progress_bar).visibility = View.VISIBLE
+                Thread(Runnable {
+                    importingProcess.block()
+                    val db = DatabaseHelper(this)
+                    db.insertRows(name, inputColumn)
+                    finish()
+                }).start()
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -162,7 +218,7 @@ class CreateDatasetActivity : AppCompatActivity() {
                 }
 
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "text/*"
+                    type = MimeTypeMap.getSingleton().getMimeTypeFromExtension("csv")
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TEXT, "Choose a file to import")
                 }
@@ -196,18 +252,14 @@ class CreateDatasetActivity : AppCompatActivity() {
         if(requestCode == IMPORT_REQUEST) {
             if(resultCode == RESULT_OK && data != null) {
                 val selectedFile = data.data
-
-//                Log.e("file uri", selectedFile.toString())
-//                val filePath = getPath(selectedFile)
-//                Log.e("file path", filePath.toString())
-//                val value = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                isImporting = 1
                 progressBar.visibility = View.VISIBLE
                 add_column_button.visibility = View.GONE
                 Thread(Runnable {
+                    importingProcess.close()
                     parseCSV(selectedFile)
-                    runOnUiThread{
-                        progressBar.visibility = View.GONE
-                    }
+                    runOnUiThread { progressBar.visibility = View.GONE }
+                    importingProcess.open()
                 }).start()
 
             }
@@ -231,31 +283,62 @@ class CreateDatasetActivity : AppCompatActivity() {
 
     private fun parseCSV(uri: Uri?) {
         if(uri == null) return
-        val docId = DocumentsContract.getDocumentId(uri)
-        Log.e("docId", docId)
+//        val docId = DocumentsContract.getDocumentId(uri)
+//        Log.e("docId", docId)
         val file = contentResolver.openInputStream(uri)!!
+        Log.e("uri", uri.toString())
         val reader = BufferedReader(InputStreamReader(file))
 
         val tableName = "Imported"
-        val columns = reader.readLine().split(",")
+        val _columns = reader.readLine().split(",")
+        if(_columns.size >= 5) {
+            Toast.makeText(this, "Dataset cannot have more than 5 columns", Toast.LENGTH_LONG).show()
+        }
         val schema = Schema(tableName)
-        for(column in columns) {
+        for((idx,column) in _columns.withIndex()) {
+            if(idx == 0) {
+                runOnUiThread {
+                    findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
+                }
+            }
+            else if(idx < columns.size) {
+                runOnUiThread {
+                    columns[idx].findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
+                }
+            }
+            else {
+                runOnUiThread {
+                    val input = constructInputField(false)
+                    input.findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
+                    addView(input)
+                }
+            }
             schema.addColumn(column, "INT")
         }
-        val db = DatabaseHelper(this)
-        db.createTable(schema)
-
+        for(idx in _columns.size until columns.size) {
+            runOnUiThread { deleteInputField(idx) }
+        }
+        //TODO: Couldn't rename column name in current version of sqlite
+//        val db = DatabaseHelper(this)
+//        db.createTable(schema)
+//
+//        var line = reader.readLine()
+//        while(line != null) {
+//            db.insertRow(tableName, ArrayList(line.split(",")))
+//            line = reader.readLine()
+//        }
+        inputColumn = ArrayList()
         var line = reader.readLine()
         while(line != null) {
-            Log.e("Line", line)
-            db.insertRow(tableName, ArrayList(line.split(",")))
+            inputColumn.add(ArrayList(line.split(",")))
             line = reader.readLine()
         }
+        isImporting = 2
 
-        val resultIntent = Intent()
-        resultIntent.putExtra("NAME", "Imported")
-        setResult(Activity.RESULT_OK, resultIntent)
-        finish()
+//        val resultIntent = Intent()
+//        resultIntent.putExtra("NAME", "Imported")
+//        setResult(Activity.RESULT_OK, resultIntent)
+//        finish()
 
 
 //        when(uri.authority) {

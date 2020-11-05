@@ -20,6 +20,7 @@ import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,6 +29,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.android.synthetic.main.activity_create_dataset.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -35,6 +37,7 @@ import java.io.InputStreamReader
 
 class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var columns: ArrayList<View>
+    private lateinit var progressBar: ProgressBar
     private val READ_PERMISSION = 20
     private val IMPORT_REQUEST = 10
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +46,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
-
+        progressBar = findViewById(R.id.import_progress_bar)
         val addButton = findViewById<Button>(R.id.add_column_button)
         addButton.setOnClickListener { v ->
             addColumn(v)
@@ -159,7 +162,7 @@ class CreateDatasetActivity : AppCompatActivity() {
                 }
 
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    type = "text/csv"
+                    type = "text/*"
                     addCategory(Intent.CATEGORY_OPENABLE)
                     putExtra(Intent.EXTRA_TEXT, "Choose a file to import")
                 }
@@ -198,7 +201,15 @@ class CreateDatasetActivity : AppCompatActivity() {
 //                val filePath = getPath(selectedFile)
 //                Log.e("file path", filePath.toString())
 //                val value = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                parseCSV(selectedFile)
+                progressBar.visibility = View.VISIBLE
+                add_column_button.visibility = View.GONE
+                Thread(Runnable {
+                    parseCSV(selectedFile)
+                    runOnUiThread{
+                        progressBar.visibility = View.GONE
+                    }
+                }).start()
+
             }
         }
     }
@@ -222,10 +233,41 @@ class CreateDatasetActivity : AppCompatActivity() {
         if(uri == null) return
         val docId = DocumentsContract.getDocumentId(uri)
         Log.e("docId", docId)
+        val file = contentResolver.openInputStream(uri)!!
+        val reader = BufferedReader(InputStreamReader(file))
 
-        when(uri.authority) {
-            // External Storage
-            "com.android.externalstorage.documents" -> {
+        val tableName = "Imported"
+        val columns = reader.readLine().split(",")
+        val schema = Schema(tableName)
+        for(column in columns) {
+            schema.addColumn(column, "INT")
+        }
+        val db = DatabaseHelper(this)
+        db.createTable(schema)
+
+        var line = reader.readLine()
+        while(line != null) {
+            Log.e("Line", line)
+            db.insertRow(tableName, ArrayList(line.split(",")))
+            line = reader.readLine()
+        }
+
+        val resultIntent = Intent()
+        resultIntent.putExtra("NAME", "Imported")
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
+
+
+//        when(uri.authority) {
+//            // External Storage
+//            "com.android.externalstorage.documents" -> {
+//                val file = contentResolver.openInputStream(uri)
+//                val reader = BufferedReader(InputStreamReader(file))
+//                var line = reader.readLine()
+//                while(line != null) {
+//                    Log.e("line", line.toString())
+//                    line = reader.readLine()
+//                }
                 // TODO Implement
 //                val selectionMime = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
 //                val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("jpg")
@@ -247,54 +289,54 @@ class CreateDatasetActivity : AppCompatActivity() {
 ////                    return "${getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)}/${path[1]}"
 ////                }
 //                return getDataColumn(uri, null, null)
-            }
+//            }
             // Download
-            "com.android.providers.downloads.documents" -> {
+//            "com.android.providers.downloads.documents" -> {
                 // TODO Implement
 //                val contentUri = ContentUris.withAppendedId(
 //                    Uri.parse("content://downloads/public_downloads"),
 //                    docId.toLong()
 //                )
 //                return getDataColumn(contentUri, null, null)
-            }
+//            }
             // Google Drive
-            "com.google.android.apps.docs.storage" -> {
-                val cursor = contentResolver?.query(uri, null, null, null, null, null)
+//            "com.google.android.apps.docs.storage" -> {
+//                val cursor = contentResolver?.query(uri, null, null, null, null, null)
 //                if (cursor != null && cursor.moveToFirst()) {
 //                    val displayName = cursor.getString(
 //                        cursor.getColumnIndex("_data")
 //                    )
 //                    Log.e("display", displayName)
 //                }
-                val file = contentResolver.openInputStream(uri)!!
-                val reader = BufferedReader(InputStreamReader(file))
-
-                val tableName = "Imported"
-                val columns = reader.readLine().split(",")
-                val schema = Schema(tableName)
-                for(column in columns) {
-                    schema.addColumn(column, "INT")
-                }
-                val db = DatabaseHelper(this)
-                db.createTable(schema)
-
-                var line = reader.readLine()
-                while(line != null) {
-                    Log.e("Line", line)
-                    db.insertRow(tableName, ArrayList(line.split(",")))
-                    line = reader.readLine()
-                }
-            }
-        }
+//                val file = contentResolver.openInputStream(uri)!!
+//                val reader = BufferedReader(InputStreamReader(file))
+//
+//                val tableName = "Imported"
+//                val columns = reader.readLine().split(",")
+//                val schema = Schema(tableName)
+//                for(column in columns) {
+//                    schema.addColumn(column, "INT")
+//                }
+//                val db = DatabaseHelper(this)
+//                db.createTable(schema)
+//
+//                var line = reader.readLine()
+//                while(line != null) {
+//                    Log.e("Line", line)
+//                    db.insertRow(tableName, ArrayList(line.split(",")))
+//                    line = reader.readLine()
+//                }
+//            }
+//        }
     }
 
-    private fun getDataColumn(uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
-        contentResolver?.query(uri, arrayOf("_data"), selection, selectionArgs, null)?.use {
-            if(it.moveToFirst()) {
-                return it.getString(it.getColumnIndexOrThrow("_data"))
-            }
-        }
-        return null
+//    private fun getDataColumn(uri: Uri, selection: String?, selectionArgs: Array<String>?): String? {
+//        contentResolver?.query(uri, arrayOf("_data"), selection, selectionArgs, null)?.use {
+//            if(it.moveToFirst()) {
+//                return it.getString(it.getColumnIndexOrThrow("_data"))
+//            }
+//        }
+//        return null
 //        var cursor: Cursor? = null
 //        var column = "_data"
 //        val projection = arrayOf(column)
@@ -309,5 +351,5 @@ class CreateDatasetActivity : AppCompatActivity() {
 //            cursor?.close()
 //        }
 //        return null
-    }
+//    }
 }

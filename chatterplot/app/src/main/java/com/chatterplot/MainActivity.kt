@@ -2,6 +2,7 @@ package com.chatterplot
 
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +11,11 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethod
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -31,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
     private lateinit var recycler_view: RecyclerView
+    private lateinit var search_bar: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +127,42 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.support_action_bar_main, menu)
+        val searchMenu = menu.findItem(R.id.dataset_search)
+        search_bar = searchMenu.actionView as SearchView
+        search_bar.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(p0: String?): Boolean {
+                (recycler_view.adapter as DatasetRecyclerViewAdapter).filter(p0)
+                return true
+            }
+        })
+
+        searchMenu.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(search_bar.windowToken, 0)
+                return true
+            }
+
+            override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                // Show keyboard maybe
+                return true
+            }
+        })
+
+//        search_bar.setOnCloseListener {
+//            Log.e("closed", "closeed")
+//            this.currentFocus?.clearFocus()
+//            true
+//        }
+        return true
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,

@@ -14,17 +14,19 @@ import kotlinx.android.synthetic.main.dataset_card.view.*
 
 
 open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
-
+    private lateinit var datasetListCopy: ArrayList<DatasetCard>
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
             parent, false)
-
+        datasetListCopy = ArrayList()
+        datasetListCopy.addAll(datasetCardList)
         return DatasetViewHolder(itemView)
     }
 
     fun addItem(name: String) {
         val card = DatasetCard(R.drawable.graph_placeholder, name)
-        datasetCardList.add(card)
+        datasetCardList.add(0, card)
+        datasetListCopy.add(0, card)
         this.notifyDataSetChanged()
     }
 
@@ -59,6 +61,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         t.show()
 
                         datasetCardList.remove(currentItem)
+                        datasetListCopy.remove(currentItem)
                         this.notifyDataSetChanged()
 //                        val intent = Intent(context, MainActivity::class.java)
 //                        context.startActivity(intent)
@@ -75,6 +78,20 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
     }
 
     override fun getItemCount() = datasetCardList.size
+
+    fun filter(query: String?) {
+        if(query.isNullOrEmpty()) {
+            datasetCardList.addAll(datasetListCopy)
+        } else {
+            datasetCardList.clear()
+            for(item in datasetListCopy) {
+                if(item.name.toLowerCase().contains(query.toLowerCase())) {
+                    datasetCardList.add(item)
+                }
+            }
+        }
+        this.notifyDataSetChanged()
+    }
 
     class DatasetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.dataset_graph_preview

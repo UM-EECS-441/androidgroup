@@ -127,7 +127,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getAllDatabaseNames(): ArrayList<String> {
         val db = this.writableDatabase
-        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, null)
+        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, "Timestamp DESC")
         val result = arrayListOf<String>()
         while(cursor.moveToNext()) {
             result.add(cursor.getString(0))

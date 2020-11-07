@@ -6,24 +6,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.util.Log
-import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.widget.Button
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_dataset_list.*
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
@@ -110,7 +102,7 @@ class MainActivity : AppCompatActivity() {
 //                textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if (speechProcessor.textProcessing(res[0])) {
+                if (speechProcessor.textProcessing(res[0], null)) {
                     (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name)
                 }
             }

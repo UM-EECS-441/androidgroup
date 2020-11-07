@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.util.Log
 import android.view.MenuItem
-import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -83,7 +82,7 @@ class DisplayDataActivity : AppCompatActivity() {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if(speechProcessor.insertDataset(res[0], tableName)) {
+                if(speechProcessor.textProcessing(res[0], tableName)) {
                     adapter.refreshTable()
                 }
             }

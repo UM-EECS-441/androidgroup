@@ -9,9 +9,12 @@ class SpeechProcessor(ctext: Context) {
     var context = ctext
     var name = "Dataset"
 
-    fun textProcessing(text: String):Boolean {
+    fun textProcessing(text: String, tableName: String?):Boolean {
         if (this.createDataset(text)) {
             Log.i("SpeechRecognizer","created dataset")
+            return true
+        } else if (tableName != null && this.insertDataset(text, tableName)) {
+            Log.i("SpeechRecognizer","inserted data to dataset: ".plus(tableName))
             return true
         } else {
             Log.i("SpeechRecognizer","command not recognized")
@@ -20,7 +23,7 @@ class SpeechProcessor(ctext: Context) {
         }
     }
 
-    fun insertDataset(text:String, tableName:String):Boolean {
+    private fun insertDataset(text:String, tableName:String):Boolean {
         if((text.contains("insert") || text.contains("add") ||
                     text.contains("enter"))) {
             val words= text.split(" ").toMutableList()
@@ -49,29 +52,91 @@ class SpeechProcessor(ctext: Context) {
                     text.contains("new") || text.contains("start")) &&
             text.contains("data")) {
             name = " "
-            for (word in text.split(" ")) {
-                Log.i("SpeechRecognizer", "text response word: ".plus(word))
-                if (word == "called" || word == "named" || word == "titled" || word == "name") {
-                    val idx = text.indexOf(word) + word.length + 1
-                    if(idx >= text.length) return false
-                    name = text.substring(idx).capitalize()
-                    break
-                }
-            }
-            if(name == " ") {
-                return false
-            }
-            Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
-            Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
-            // Run create dataset function
+            var nameStart = text.length
+            var nameEnd = text.length
+            var numColumns = 0
+            var columnNames = arrayListOf<String>()
             try {
-                DatabaseHelper(context).createDataset(name, arrayListOf("Y"))
+                for ((idx, word) in text.split(" ").withIndex()) {
+                    Log.i("SpeechRecognizer", "text response word: ".plus(word))
+                    if (word == "called" || word == "named" || word == "titled") {
+                        nameStart = text.indexOf(word) + word.length + 1
+                        if(nameStart >= text.length) return false
+                    } else if (word == "column" || word == "columns") {
+                        nameEnd = text.indexOf("with") - 1
+                        val textList = text.split(" ")
+                        try {
+                            numColumns = textList[idx - 1].toInt()
+                        } catch (e:Exception) {
+                            numColumns = this.textToInt(textList[idx - 1])
+                            if (numColumns == -1) throw Exception("Invalid column number")
+                        }
+                        var columnCount = 0
+                        for (i in (idx + 2) until textList.size) {
+                            if (columnCount >= numColumns) break
+                            if (textList[i] == "and" || textList[i] == "+") continue
+                            columnNames.add(textList[i])
+                            columnCount += 1
+                        }
+                        Log.i("SpeechRecognizer", "column names: ".plus(columnNames.joinToString(" ")))
+                        break
+                    }
+                }
+                name = text.substring(nameStart, nameEnd).capitalize()
+                if(name == " ") return false
+
+                // Run create dataset function
+
+                if (columnNames.isEmpty()) {
+                    DatabaseHelper(context).createDataset(name, arrayListOf("Y"))
+                } else {
+                    DatabaseHelper(context).createDataset(name, columnNames)
+                }
+                Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
+                Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()
+                return true
             } catch(e:Exception) {
+                Log.i("SpeechRecognizer","Error: ".plus(e.message))
                 return false
             }
-            return true
         }
         return false
+    }
+
+    private fun textToInt(text: String): Int {
+        when (text.toLowerCase()) {
+            "one" -> {
+                return 1
+            }
+            "two" -> {
+                return 2
+            }
+            "three" -> {
+                return 3
+            }
+            "four" -> {
+                return 4
+            }
+            "five" -> {
+                return 5
+            }
+            "six" -> {
+                return 6
+            }
+            "seven" -> {
+                return 7
+            }
+            "eight" -> {
+                return 8
+            }
+            "nine" -> {
+                return 9
+            }
+            "zero" -> {
+                return 0
+            }
+            else -> return -1
+        }
     }
 }
 

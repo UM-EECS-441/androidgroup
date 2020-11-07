@@ -101,7 +101,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         while(cursor.moveToNext()) {
             for (col in colNames) {
                 if(col == "Timestamp") {
-                    val timestamp = cursor.getDouble(cursor.getColumnIndex(col))
+                    val timestamp = cursor.getLong(cursor.getColumnIndex(col))
 //                    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
 //                    val cal = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime()
                     resultDict[col]!!.add(timestamp)
@@ -129,7 +129,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         for (idx in 0 until schema.columns.size) {
             sqlQuery += "[${schema.columns[idx].first}] ${schema.columns[idx].second}, "
         }
-        sqlQuery += "Timestamp DOUBLE)"
+        sqlQuery += "Timestamp INTEGER)"
         db.execSQL(sqlQuery)
         val time = Instant.now().toEpochMilli()
         // Insert to the table that keeps track of all data sets

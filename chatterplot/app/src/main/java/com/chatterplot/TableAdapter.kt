@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Typeface
+import android.icu.util.UniversalTimeScale.toLong
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -17,6 +18,9 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.setPadding
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class TableAdapter {
@@ -72,37 +76,48 @@ class TableAdapter {
     fun loadTable() {
         //TODO add title row with column names
         tableView?.removeAllViews()
-        var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
+        var titleRow: TableRow = createTableRow(tableData.keys.size - 1)
         var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
             TableRow.LayoutParams.MATCH_PARENT,
             TableRow.LayoutParams.WRAP_CONTENT)
         titleRow.layoutParams = rowLayoutParams
 
-        var i = 0
+        var i = 1
         for ((colKey, _) in tableData) {
             if (colKey != "ID" && colKey != "Timestamp") {
                 var rowNum: TextView = titleRow.getChildAt(i) as TextView
                 rowNum.text = colKey.toString()
                 rowNum.setTypeface(null, Typeface.BOLD)
                 ++i
+            } else if (colKey == "Timestamp") { //Date directly set to first column
+                var rowNum: TextView = titleRow.getChildAt(0) as TextView
+                rowNum.text = "Date"
+                rowNum.setTypeface(null, Typeface.BOLD)
             }
         }
         (tableView as ViewGroup).addView(titleRow)
 
 
         for (row in 0 until tableData["ID"]!!.size) {
-            var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
+            var newRow: TableRow = createTableRow(tableData.keys.size - 1)  // exclude timestamp and ID
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
             newRow.layoutParams = rowLayoutParams
 
-            var colNum: Int = 0
+            // Feels like a messy solution to display time as first column. Restructuring database
+            // to make timestamp first column by default would be much cleaner
+            var colNum: Int = 1
             for ((colKey, colData) in tableData) {
                 if (colKey != "ID" && colKey != "Timestamp") {
                     var rowNum: TextView = newRow.getChildAt(colNum) as TextView
                     rowNum.text = colData[row].toString()
                     ++colNum
+                } else if (colKey == "Timestamp") {
+                    var rowNum: TextView = newRow.getChildAt(0) as TextView
+                    val sdf = SimpleDateFormat("MM/dd/yy")
+                    val netDate = Date(colData[row] as Long)
+                    rowNum.text = sdf.format(netDate)
                 }
             }
             (tableView as ViewGroup).addView(newRow)

@@ -14,6 +14,11 @@
     <item
         android:id="@+id/create_dataset"
         android:icon="@drawable/ic_add_24"
-        android:title="Create dataset"
+        android:title="Add data"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/export_data_button"
+        android:icon="@drawable/ic_baseline_share_24"
+        android:title="Export to CSV"
         app:showAsAction="ifRoom"/>
 </menu>

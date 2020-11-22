@@ -19,31 +19,64 @@
             android:hint="Title"
             app:layout_constraintTop_toTopOf="parent"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences"
+                android:textAllCaps="false" />
         </com.google.android.material.textfield.TextInputLayout>
+
         <RelativeLayout
+            android:id="@+id/dataset_column_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/dataset_column_1"
-            app:layout_constraintTop_toBottomOf="@id/dataset_name">
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/xAxisRadioGroup"
+            tools:layout_editor_absoluteX="0dp">
+
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/column_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="56dp"
-                android:theme="@style/AppThemeMaterial"
-                android:id="@+id/column_input"
-                android:hint="Column 1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                android:layout_marginBottom="8dp"
+                android:hint="Column 1 Name"
+                android:theme="@style/AppThemeMaterial">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"/>
             </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
+
+        <RadioGroup
+            android:id="@+id/xAxisRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dataset_name">
+
+            <RadioButton
+                android:id="@+id/dateAsX"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Use Date as X" />
+
+            <RadioButton
+                android:id="@+id/col1AsX"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Use Column 1 as X" />
+        </RadioGroup>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

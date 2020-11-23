@@ -32,9 +32,9 @@ class DisplayDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_data)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        tableName = intent.getStringExtra("DATASETNAME")
+        tableName = intent.getStringExtra("DATASETNAME") ?: ""
         //create tableAdapter
         adapter = TableAdapter(this, tableName)
         adapter.loadTable()

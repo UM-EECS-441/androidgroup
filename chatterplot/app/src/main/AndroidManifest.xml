@@ -26,11 +26,13 @@
         </provider>
         <activity android:name=".SettingActivity"
             android:parentActivityName=".MainActivity"/>
-        <activity android:name=".DisplayDataActivity" />
+        <activity android:name=".DisplayDataActivity"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".CreateDatasetActivity" />
         <activity android:name=".InsertDataActivity" />
         <activity android:name=".DatasetListActivity" />
-        <activity android:name=".GraphActivity" />
+        <activity android:name=".GraphActivity"
+            android:parentActivityName=".MainActivity"/>
         <activity android:name=".DatabaseActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

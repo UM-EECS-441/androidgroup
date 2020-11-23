@@ -31,38 +31,13 @@ class TableAdapter {
         tableView = (this.context as DisplayDataActivity).findViewById<TableLayout>(R.id.dataDisplayTable)
 
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
-//        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
-//
-//        val pullDataQuery: String = ""  //TODO write the actual query dependent on schema
-//        val selectionArgs: Array<String> = {}  // also depend on schema (fill in ? in pullDataQuery)
-//
-//        var dataCursor = db.rawQuery(pullDataQuery, selectionArgs)
-//
-//        // retrieve data from cursor and preload into MutableList for easier manipulation and
-//        // quicker retrieval
-//        dataCursor.moveToFirst()
-//        tableData.add(dataCursor.getInt(0))  //get col 0
-//        while (dataCursor.moveToNext()) {
-//            tableData.add(dataCursor.getInt(0))
-//        }
     }
 
-    /*
-    * Fetches the item at row <position>.
-    *
-    * currently, our datasets only hold single-column numerical data
-    *
-    * */
-//    fun getItem(position: Int): Int? {
-//        if (position >= tableData.size) {
-//            return null
-//        }
-//        return tableData[position]
-//    }
     fun refreshTable() {
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
         loadTable()
     }
+
 
     /*
     * Loads table in context with id dataDisplayTable with data from the dataset determined by
@@ -70,7 +45,6 @@ class TableAdapter {
     *
     * */
     fun loadTable() {
-        //TODO add title row with column names
         tableView?.removeAllViews()
         var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
         var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
@@ -89,8 +63,7 @@ class TableAdapter {
         }
         (tableView as ViewGroup).addView(titleRow)
 
-
-        for (row in 0 until tableData["ID"]!!.size) {
+        for (row in 0 until getNumRows()) {
             var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -106,17 +79,9 @@ class TableAdapter {
                 }
             }
             (tableView as ViewGroup).addView(newRow)
-
-            //show row number in table
-//            var rowNum:TextView = newRow.getChildAt(0) as TextView
-//            rowNum.text = row.toString()
-//
-//            //data value
-//            var item: TextView = newRow.getChildAt(1) as TextView
-//            item.text = tableData[row].toString()
-
         }
     }
+
 
     private fun createTableRow(numColumns: Int): TableRow {
         var row = TableRow(context)
@@ -130,5 +95,30 @@ class TableAdapter {
             (item.layoutParams as TableRow.LayoutParams).width = TableRow.LayoutParams.WRAP_CONTENT
         }
         return row
+    }
+
+
+    fun getDataRow(row: Int): List<Any> {
+        var data: ArrayList<Any> = arrayListOf()
+        for ((colHeader, colData) in tableData) {
+            if (colHeader != "ID" && colHeader != "Timestamp") {
+                data.add(colData[row])
+            }
+        }
+        return data.toList()
+    }
+
+
+    fun getNumRows(): Int {
+        return tableData["ID"]!!.size
+    }
+
+
+    fun getColumnNames(): List<String> {
+        var names: ArrayList<String> = arrayListOf()
+        for ((colName, _) in tableData) {
+            names.add(colName)
+        }
+        return names.toList()
     }
 }

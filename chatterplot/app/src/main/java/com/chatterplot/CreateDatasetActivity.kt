@@ -30,6 +30,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.activity_create_dataset.*
+
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -47,13 +48,22 @@ class CreateDatasetActivity : AppCompatActivity() {
     var isImporting = 0
     val importingProcess = ConditionVariable(true)
 
+    lateinit var graphedBy: RadioGroup
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_dataset)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
+
         progressBar = findViewById(R.id.import_progress_bar)
+
+
+        graphedBy = findViewById(R.id.xAxisRadioGroup)
+
+
         val addButton = findViewById<Button>(R.id.add_column_button)
         addButton.setOnClickListener { v ->
             addColumn(v)
@@ -91,6 +101,8 @@ class CreateDatasetActivity : AppCompatActivity() {
         setter.applyTo(inputs)
         columns.add(layout)
 
+        graphedBy.visibility = View.VISIBLE
+
 //        Snackbar.make(view, "Created a column", Snackbar.LENGTH_LONG)
 //            .setAction("Undo") {
 //                //Action
@@ -103,7 +115,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         val layout = inflater.inflate(R.layout.column_input_field, null, false)
         layout.id = View.generateViewId()
         val textInput = layout.findViewById<TextInputLayout>(R.id.column_input)
-        textInput.hint = "Column ${columns.size+1}"
+        textInput.hint = "Column ${columns.size+1} Name"
         val deleteBtn = layout.findViewById<ImageButton>(R.id.delete_button)
         if(!isDeletable) {
             deleteBtn.visibility = View.INVISIBLE
@@ -120,6 +132,10 @@ class CreateDatasetActivity : AppCompatActivity() {
 
     private fun deleteInputField(tag: Int) {
         if(columns.size == 1 || tag >= columns.size) return
+        if(columns.size == 2) {
+            graphedBy.visibility = View.INVISIBLE
+            graphedBy.check(R.id.dateAsX)
+        }
         val parent = findViewById<ConstraintLayout>(R.id.create_input_fields)
         parent.removeView(columns[tag])
         if(tag != columns.size - 1) {
@@ -137,7 +153,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         columns.removeAt(tag)
         for(i in tag until columns.size) {
             val textInput = columns[i].findViewById<TextInputLayout>(R.id.column_input)
-            textInput.hint = "Column ${i+1}"
+            textInput.hint = "Column ${i+1} Name"
             val deleteBtn = columns[i].findViewById<ImageButton>(R.id.delete_button)
             deleteBtn.tag = i
         }
@@ -149,6 +165,7 @@ class CreateDatasetActivity : AppCompatActivity() {
             Toast.makeText(this, "Name of the dataset must be specified", Toast.LENGTH_LONG).show()
             return
         }
+
         val schema = Schema(name)
         for(column in columns) {
             val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
@@ -158,6 +175,12 @@ class CreateDatasetActivity : AppCompatActivity() {
             }
             schema.addColumn(colName, "INT")
         }
+
+        //Check if graphing by column is selected and set schema value accordingly.
+        //Graphing by date is true by default, so it is not checked
+        val selectedID = graphedBy.checkedRadioButtonId
+        if (selectedID == R.id.col1AsX) schema.isGraphedByDate(false)
+
         DatabaseHelper(this).createTable(schema)
 
         val resultIntent = Intent()

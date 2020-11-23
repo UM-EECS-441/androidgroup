@@ -8,6 +8,7 @@
     tools:context=".DisplayDataActivity">
 
     <ScrollView
+        android:layout_above="@+id/export_button"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
@@ -16,9 +17,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
         <TableLayout
             android:id="@+id/dataDisplayTable"
+            android:layout_above="@+id/export_button"
             android:layout_width="409dp"
             android:layout_height="729dp"
             android:layout_margin="8dp"
@@ -29,6 +30,7 @@
 
         </TableLayout>
     </ScrollView>
+
     <com.google.android.material.bottomappbar.BottomAppBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

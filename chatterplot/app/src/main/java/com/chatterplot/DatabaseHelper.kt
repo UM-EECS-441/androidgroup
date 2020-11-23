@@ -17,8 +17,12 @@ import java.time.format.DateTimeFormatter
 
 class Schema(val name: String) {
     val columns = ArrayList<Pair<String, String>>()
+    var graphByDate = true
     fun addColumn(name: String, type: String) {
         columns.add(Pair(name, type))
+    }
+    fun isGraphedByDate(checker: Boolean) {
+        graphByDate = checker
     }
 }
 
@@ -181,6 +185,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val time = Instant.now().toEpochMilli()
         // Insert to the table that keeps track of all data sets
         db.execSQL("INSERT INTO DATASET (TableName, Timestamp) VALUES ('${schema.name}', ${time})")
+        Log.d("Dataset Created", schema.name + " graphByDate = " + schema.graphByDate)
     }
 
     fun deleteTable(tableName: String) {

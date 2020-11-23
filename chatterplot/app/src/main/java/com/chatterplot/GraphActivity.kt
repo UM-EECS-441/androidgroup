@@ -1,11 +1,24 @@
 package com.chatterplot
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.provider.MediaStore
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import androidx.core.view.postDelayed
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
@@ -13,26 +26,64 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AASeries
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAXAxis
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.Description
-import com.github.mikephil.charting.components.MarkerView
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.google.android.material.bottomappbar.BottomAppBar
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 
 class GraphActivity : AppCompatActivity() {
     private lateinit var tableName:String
     private lateinit var chartView: AAChartView
+    private lateinit var preview: AAChartView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_graph)
         tableName = intent.getStringExtra("DATASETNAME")
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
+        preview = AAChartView(this)
+        preview.layout(0, 0, 1000, 400)
+
         graphDataset()
+
+        Handler().postDelayed({
+            val bitmap = convertViewToBitmap(preview as View)
+            saveBitmap(this, bitmap, "$tableName.png")
+        }, 5000)
+
+        val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
+        bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when(menuItem.itemId) {
+                R.id.share_dataset -> {
+                    val bitmap = convertViewToBitmap(chartView)
+                    val bytestream = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytestream)
+                    val f = File(this.getExternalFilesDir(null), "temp.jpeg")
+                    try {
+                        f.createNewFile()
+                        val fo = FileOutputStream(f)
+                        fo.write(bytestream.toByteArray())
+                    } catch (e: Exception) {
+                        Log.e("Error", e!!.localizedMessage)
+                    }
+//                    saveBitmap(this, bitmap, "share.png")
+//                    val f = File(this.filesDir, "share.png")
+                    val uri = FileProvider.getUriForFile(this, this.applicationContext.packageName + ".provider", f)
+//                    val uri = Uri.parse(f.toUri().toString())
+                    Log.e("File uri", uri.toString())
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "image/*"
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    }
+                    startActivity(Intent.createChooser(intent, null))
+                    true
+                }
+                else -> {
+                    true
+                }
+            }
+
+        }
     }
     fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
@@ -57,6 +108,16 @@ class GraphActivity : AppCompatActivity() {
             .xAxisLabelsEnabled(false)
 //            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
+
+        preview.aa_drawChartWithChartModel(chartModel
+            .legendEnabled(false)
+            .yAxisLabelsEnabled(false)
+            .title("")
+            .yAxisTitle("")
+            .dataLabelsEnabled(false)
+            .xAxisTickInterval(0)
+            .yAxisGridLineWidth(0F)
+            .xAxisVisible(false))
     }
 
 //    fun createLineChart() {
@@ -108,11 +169,11 @@ class GraphActivity : AppCompatActivity() {
 //    }
 }
 
-class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormatter() {
-    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-        return axisLabel[value.toInt()]
-    }
-}
+//class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormatter() {
+//    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+//        return axisLabel[value.toInt()]
+//    }
+//}
 
 //class BarChartSelectedListener : OnChartValueSelectedListener {
 //    override fun onValueSelected(e: Entry?, h: Highlight?) {

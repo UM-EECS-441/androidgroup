@@ -47,7 +47,14 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/progress_indicator"
+        style="?android:attr/progressBarStyleSmall"
+        android:id="@+id/import_progress_bar"
+        android:layout_gravity="left|bottom"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/add_column_button"
@@ -68,5 +75,20 @@
         android:backgroundTint="@color/colorPrimary"
         android:text="Create"
         android:textColor="#FFFFFF" />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/main_progress_bar"
+        android:clickable="false"
+        android:visibility="gone"
+        android:alpha="0.5">
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:progressDrawable="@drawable/progress_indicator"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_gravity="center" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -37,4 +37,13 @@
         android:src="@drawable/white_mic_icon"
         android:id="@+id/recognizerButton"
         app:layout_anchor="@id/bottom_app_bar" />
+
+    <Button
+        android:id="@+id/chart_menu_button"
+        android:layout_gravity="right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:backgroundTint="#FFFFFF"
+        android:text="Graph Type" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

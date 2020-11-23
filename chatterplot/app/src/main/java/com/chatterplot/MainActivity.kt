@@ -2,21 +2,16 @@ package com.chatterplot
 
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.InputMethod
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,7 +24,6 @@ import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_dataset_list.*
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
@@ -37,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     private val CREATE_REQUEST_CODE = 30
     private lateinit var recognizerIntent: Intent
     private lateinit var recycler_view: RecyclerView
-    private lateinit var search_bar: SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,15 +95,8 @@ class MainActivity : AppCompatActivity() {
         val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
         val cardList = ArrayList<DatasetCard>()
         for (i in 0 until datasetNameList.size) {
-            val img = File(this.filesDir, "${datasetNameList[i]}.png")
-            if(img.isFile) {
-                val drawableImg = Drawable.createFromPath(img.absolutePath)
-                val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i], drawableImg)
-                cardList += newCard
-            } else {
-                val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
-                cardList += newCard
-            }
+            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
+            cardList.add(newCard)
         }
         return cardList
     }
@@ -138,36 +124,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.support_action_bar_main, menu)
-        val searchMenu = menu.findItem(R.id.dataset_search)
-        search_bar = searchMenu.actionView as SearchView
-        search_bar.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(p0: String?): Boolean {
-                return false
-            }
-
-            override fun onQueryTextChange(p0: String?): Boolean {
-                (recycler_view.adapter as DatasetRecyclerViewAdapter).filter(p0)
-                return true
-            }
-        })
-
-        searchMenu.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(search_bar.windowToken, 0)
-                return true
-            }
-
-            override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
-                // Show keyboard maybe
-                return true
-            }
-        })
-        return true
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
                                             grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -179,13 +135,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+//    fun showCreateDialog(v: View?) {
+//        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
+//        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
+//        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
+//        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
+//
+//        val alertDialog = AlertDialog.Builder(this)
+//        alertDialog.setTitle("Create new dataset")
+//        alertDialog.setView(createDialog)
+//        alertDialog.setNegativeButton("Cancel", null)
+//        alertDialog.setPositiveButton("Create")  {dialog, which ->
+//            val tableName = datasetName.text.toString()
+//            val xAxis = datasetIndependent.text.toString()
+//            val yAxis = datasetDependent.text.toString()
+//            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
+//
+//        }
+//        alertDialog.create().show()
+//    }
+
     fun showAllDatabase(v:View?) {
         val intent = Intent(this, DatabaseActivity::class.java)
-        startActivity(intent)
-    }
-
-    fun showSettings(v: View?) {
-        val intent = Intent(this, SettingActivity::class.java)
         startActivity(intent)
     }
 

@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.icu.text.SimpleDateFormat
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -23,6 +24,8 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import java.util.*
+import kotlin.collections.ArrayList
 
 class GraphActivity : AppCompatActivity() {
     private lateinit var tableName:String
@@ -34,19 +37,35 @@ class GraphActivity : AppCompatActivity() {
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
         graphDataset()
     }
-    fun graphDataset() {
+    private fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
         val graphData = ArrayList<AASeriesElement>()
-        val timestamp = data["Timestamp"] ?: ArrayList<Any>()
 
-        for((key,value) in data) {
-            if(key != "ID" && key != "Timestamp") {
-                val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
-                    arrayOf(timestamp[it],(value[it] as String).toInt())
-                })
-                graphData.add(current)
+        /*if (DatabaseHelper(this).databaseUsesDateAsX(tableName)) {
+            val timestamp = data["Timestamp"] ?: ArrayList<Any>()
+            for((key,value) in data) {
+
+                if(key != "ID" && key != "Timestamp") {
+                    val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
+                        arrayOf(timestamp[it],(value[it] as String).toInt())
+                    })
+                    graphData.add(current)
+                }
             }
-        }
+        } else {
+            val timestamp = data["Timestamp"] ?: ArrayList<Any>()
+            for((key,value) in data) {
+
+                if(key != "ID" && key != "Timestamp") {
+                    val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
+                        arrayOf(timestamp[it],(value[it] as String).toInt())
+                    })
+                    graphData.add(current)
+                }
+            }
+        }*/
+
+
         val chartModel = AAChartModel()
             .chartType(AAChartType.Line)
             .title(tableName)

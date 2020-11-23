@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,12 +19,29 @@ import com.google.android.material.textfield.TextInputLayout
 
 class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var columns: ArrayList<View>
+
+    lateinit var spin: Spinner
+    lateinit var adapter: ArrayAdapter<String>
+    lateinit var refreshButton: ImageButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_dataset)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
+
+        spin = findViewById(R.id.xAxisSpinner)
+        adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayListOf("Timestamp"))
+        refreshButton = findViewById<ImageButton>(R.id.spinnerRefreshButton)
+        spin.adapter = adapter
+
+        disableSpinner()
+
+        refreshButton.setOnClickListener {
+            refreshButton.animate().setDuration(250).rotationBy(360f).start()
+            updateSpinner()
+        }
 
         val addButton = findViewById<Button>(R.id.add_column_button)
         addButton.setOnClickListener { v ->
@@ -34,6 +52,38 @@ class CreateDatasetActivity : AppCompatActivity() {
         createButton.setOnClickListener { _ ->
             createDataset()
         }
+    }
+
+    // Updates the X-Axis selection spinner to include all named columns as long as
+    // there are more than 1 columns
+    private fun updateSpinner() {
+        adapter.clear()
+        adapter.add("Timestamp")
+
+        for (col in columns) {
+            val colname = col.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
+            if (colname != "") {
+                adapter.add(colname)
+            }
+        }
+        if (columns.size > 1) {
+            enableSpinner()
+        } else {
+            disableSpinner()
+        }
+    }
+
+    private fun enableSpinner() {
+        spin.isEnabled = true
+        spin.alpha = 1f
+        refreshButton.isEnabled = true
+    }
+
+    private fun disableSpinner() {
+        spin.isEnabled = false
+        spin.alpha = 0.75f
+        spin.setSelection(0)
+        refreshButton.isEnabled = false
     }
 
     private fun addColumn(view : View?) {
@@ -50,7 +100,11 @@ class CreateDatasetActivity : AppCompatActivity() {
         setter.clone(inputs)
         setter.connect(layout.id, ConstraintSet.TOP, columns.last().id, ConstraintSet.BOTTOM, 0)
         setter.applyTo(inputs)
+
         columns.add(layout)
+
+        updateSpinner()
+        Log.v("Spinner", "Updated")
 
 //        Snackbar.make(view, "Created a column", Snackbar.LENGTH_LONG)
 //            .setAction("Undo") {
@@ -90,6 +144,9 @@ class CreateDatasetActivity : AppCompatActivity() {
             val deleteBtn = columns[i].findViewById<ImageButton>(R.id.delete_button)
             deleteBtn.tag = i
         }
+
+        updateSpinner()
+        Log.e("Spinner", "Updated")
     }
 
     private fun createDataset() {
@@ -107,6 +164,11 @@ class CreateDatasetActivity : AppCompatActivity() {
             }
             schema.addColumn(colName, "INT")
         }
+
+
+        schema.setXAxisColumn(spin.selectedItem.toString())
+        Log.v("Spin", "Selected "+spin.selectedItem.toString())
+
         DatabaseHelper(this).createTable(schema)
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)

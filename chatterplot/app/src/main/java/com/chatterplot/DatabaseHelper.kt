@@ -16,15 +16,20 @@ import java.time.format.DateTimeFormatter
 
 class Schema(val name: String) {
     val columns = ArrayList<Pair<String, String>>()
+    var xAxisColumnName = "Timestamp"
     fun addColumn(name: String, type: String) {
         columns.add(Pair(name, type))
+    }
+    fun setXAxisColumn(checker: String) {
+        xAxisColumnName = checker
     }
 }
 
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp FLOAT)"
+        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT)"
         db!!.execSQL(sqlQuery)
+        Log.d("SQL", "Created DATASET table")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -57,13 +62,16 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         if(colNames.size - 2 != values.size) {
             throw Exception("Number of input does not match number of columns")
         }
-        for(i in 0 until values.size) {
-            sqlval.put("[${colNames[i+1]}]", values[i])
-        }
-//        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
+
         val time = Instant.now().toEpochMilli()
         Log.e("Time", time.toString())
         sqlval.put("Timestamp", time)
+
+        for(i in 0 until values.size) {
+            sqlval.put("[${colNames[i+2]}]", values[i])
+        }
+//        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
+
         val db = this.writableDatabase
         db.insertOrThrow("[$tableName]", null, sqlval)
         Log.e("sql", getTable(tableName).toString())
@@ -85,6 +93,17 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val result = arrayListOf<String>()
         while(cursor.moveToNext()) {
             result.add(cursor.getString(0))
+        }
+        cursor.close()
+        return result
+    }
+
+    fun getXAxisColumnName(datasetName: String): String {
+        val db = this.writableDatabase
+        val cursor = db.query("DATASET", arrayOf("XAxisColumn"), "TableName='$datasetName'", null, null, null, null, null)
+        var result = "Timestamp"
+        while (cursor.moveToNext()) {
+            result = cursor.getString(0)
         }
         cursor.close()
         return result
@@ -126,14 +145,19 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun createTable(schema: Schema) {
         val db = this.writableDatabase
         var sqlQuery = "CREATE TABLE [${schema.name}] (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" + ","
+        sqlQuery += "Timestamp INTEGER"
         for (idx in 0 until schema.columns.size) {
-            sqlQuery += "[${schema.columns[idx].first}] ${schema.columns[idx].second}, "
+            sqlQuery += ", [${schema.columns[idx].first}] ${schema.columns[idx].second}"
         }
-        sqlQuery += "Timestamp INTEGER)"
+        sqlQuery += ")"
         db.execSQL(sqlQuery)
+
+
         val time = Instant.now().toEpochMilli()
+        var datasetXAxis = schema.xAxisColumnName
         // Insert to the table that keeps track of all data sets
-        db.execSQL("INSERT INTO DATASET (TableName, Timestamp) VALUES ('${schema.name}', ${time})")
+        db.execSQL("INSERT INTO DATASET (TableName, Timestamp, XAxisColumn) VALUES ('${schema.name}', ${time}, '${datasetXAxis}')")
+        Log.e("SQLInsert", "Inserted "+schema.name+" Into DATASET")
     }
 
     fun deleteTable(tableName: String) {

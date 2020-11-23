@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Typeface
+import android.icu.text.SimpleDateFormat
 import android.icu.util.UniversalTimeScale.toLong
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +19,6 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.setPadding
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -28,6 +28,7 @@ class TableAdapter {
     private var tableView: TableLayout? = null
     var context: Context? = null
     private lateinit var tableNameDB: String
+    private var graphedByDate: Boolean = true
 
     constructor(context: Context, tableNameDB: String) {
         this.context = context
@@ -49,6 +50,7 @@ class TableAdapter {
 //        while (dataCursor.moveToNext()) {
 //            tableData.add(dataCursor.getInt(0))
 //        }
+
     }
 
     /*
@@ -76,60 +78,88 @@ class TableAdapter {
     fun loadTable() {
         //TODO add title row with column names
         tableView?.removeAllViews()
-        var titleRow: TableRow = createTableRow(tableData.keys.size - 1)
-        var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.MATCH_PARENT,
-            TableRow.LayoutParams.WRAP_CONTENT)
-        titleRow.layoutParams = rowLayoutParams
+        //Log.e("DateIndexed", graphedByDate.toString())
 
-        var i = 1
-        for ((colKey, _) in tableData) {
-            if (colKey != "ID" && colKey != "Timestamp") {
-                var rowNum: TextView = titleRow.getChildAt(i) as TextView
-                rowNum.text = colKey.toString()
-                rowNum.setTypeface(null, Typeface.BOLD)
-                ++i
-            } else if (colKey == "Timestamp") { //Date directly set to first column
-                var rowNum: TextView = titleRow.getChildAt(0) as TextView
-                rowNum.text = "Date"
-                rowNum.setTypeface(null, Typeface.BOLD)
-            }
-        }
-        (tableView as ViewGroup).addView(titleRow)
-
-
-        for (row in 0 until tableData["ID"]!!.size) {
-            var newRow: TableRow = createTableRow(tableData.keys.size - 1)  // exclude timestamp and ID
+        if (!graphedByDate) {
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
-            newRow.layoutParams = rowLayoutParams
+            titleRow.layoutParams = rowLayoutParams
 
-            // Feels like a messy solution to display time as first column. Restructuring database
-            // to make timestamp first column by default would be much cleaner
-            var colNum: Int = 1
-            for ((colKey, colData) in tableData) {
+            var i = 0
+            for ((colKey, _) in tableData) {
                 if (colKey != "ID" && colKey != "Timestamp") {
-                    var rowNum: TextView = newRow.getChildAt(colNum) as TextView
-                    rowNum.text = colData[row].toString()
-                    ++colNum
-                } else if (colKey == "Timestamp") {
-                    var rowNum: TextView = newRow.getChildAt(0) as TextView
-                    val sdf = SimpleDateFormat("MM/dd/yy")
-                    val netDate = Date(colData[row] as Long)
-                    rowNum.text = sdf.format(netDate)
+                    var rowNum: TextView = titleRow.getChildAt(i) as TextView
+                    rowNum.text = colKey.toString()
+                    rowNum.setTypeface(null, Typeface.BOLD)
+                    ++i
                 }
             }
-            (tableView as ViewGroup).addView(newRow)
+            (tableView as ViewGroup).addView(titleRow)
 
-            //show row number in table
-//            var rowNum:TextView = newRow.getChildAt(0) as TextView
-//            rowNum.text = row.toString()
-//
-//            //data value
-//            var item: TextView = newRow.getChildAt(1) as TextView
-//            item.text = tableData[row].toString()
+            for (row in 0 until getNumRows()) {
+                var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
+                var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT)
+                newRow.layoutParams = rowLayoutParams
 
+                var colNum: Int = 0
+                for ((colKey, colData) in tableData) {
+                    if (colKey != "ID" && colKey != "Timestamp") {
+                        var rowText: TextView = newRow.getChildAt(colNum) as TextView
+                        rowText.text = colData[row].toString()
+                        ++colNum
+                    }
+                }
+                (tableView as ViewGroup).addView(newRow)
+            }
+        } else {
+
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 1)
+            var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+                TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT)
+            titleRow.layoutParams = rowLayoutParams
+
+            var i = 1
+            for ((colKey, _) in tableData) {
+                if (colKey != "ID" && colKey != "Timestamp") {
+                    var rowNum: TextView = titleRow.getChildAt(i) as TextView
+                    rowNum.text = colKey.toString()
+                    rowNum.setTypeface(null, Typeface.BOLD)
+                    ++i
+                } else if (colKey == "Timestamp") { //Date directly set to first column
+                    var rowNum: TextView = titleRow.getChildAt(0) as TextView
+                    rowNum.text = "Date"
+                    rowNum.setTypeface(null, Typeface.BOLD)
+                }
+            }
+            (tableView as ViewGroup).addView(titleRow)
+
+            for (row in 0 until getNumRows()) {
+                var newRow: TableRow = createTableRow(tableData.keys.size - 1)  // exclude ID
+                var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+                    TableRow.LayoutParams.MATCH_PARENT,
+                    TableRow.LayoutParams.WRAP_CONTENT)
+                newRow.layoutParams = rowLayoutParams
+
+                var colNum = 1
+                for ((colKey, colData) in tableData) {
+                    if (colKey != "ID" && colKey != "Timestamp") {
+                        var rowNum: TextView = newRow.getChildAt(colNum) as TextView
+                        rowNum.text = colData[row].toString()
+                        ++colNum
+                    } else if (colKey == "Timestamp") {
+                        var rowNum: TextView = newRow.getChildAt(0) as TextView
+                        val sdf = SimpleDateFormat("MM/dd/yy")
+                        val netDate = Date(colData[row] as Long)
+                        rowNum.text = sdf.format(netDate)
+                    }
+                }
+                (tableView as ViewGroup).addView(newRow)
+            }
         }
     }
 
@@ -145,5 +175,9 @@ class TableAdapter {
             (item.layoutParams as TableRow.LayoutParams).width = TableRow.LayoutParams.WRAP_CONTENT
         }
         return row
+    }
+
+    private fun getNumRows(): Int {
+        return tableData["ID"]!!.size
     }
 }

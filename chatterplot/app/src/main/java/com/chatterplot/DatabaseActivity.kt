@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.activity_dataset_list.*
 
 class DatabaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-//        Log.d("heredude", "yes")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_database)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -23,7 +22,7 @@ class DatabaseActivity : AppCompatActivity() {
         getListOfTables(findViewById<ListView>(R.id.datasetList))
     }
 
-    fun getListOfTables(lv: ListView) {
+    private fun getListOfTables(lv: ListView) {
         val dbList = DatabaseHelper(this).getAllDatabase()
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, dbList)
         lv.adapter = adapter

@@ -1,53 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".CreateDatasetActivity"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:background="#00FFFFFF"
+    tools:context=".CreateDatasetActivity">
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/create_input_fields"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/create_input_fields">
+        android:layout_height="match_parent">
+
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/dataset_name"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:id="@+id/dataset_name"
-            android:theme="@style/AppThemeMaterial"
             android:hint="Title"
+            android:theme="@style/AppThemeMaterial"
             app:layout_constraintTop_toTopOf="parent"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            tools:layout_editor_absoluteX="16dp">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:inputType="textCapWords"
                 android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
+
         <RelativeLayout
+            android:id="@+id/dataset_column_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/dataset_column_1"
-            app:layout_constraintTop_toBottomOf="@id/dataset_name">
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/xAxisSpinner"
+            tools:layout_editor_absoluteX="0dp">
+
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/column_input"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:layout_marginEnd="56dp"
-                android:theme="@style/AppThemeMaterial"
-                android:id="@+id/column_input"
+                android:layout_marginBottom="16dp"
                 android:hint="Column 1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                android:theme="@style/AppThemeMaterial">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:inputType="textCapWords"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences" />
             </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
+        <Spinner
+            android:id="@+id/xAxisSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:spinnerMode="dropdown"
+            app:layout_constraintStart_toEndOf="@+id/xAxisSpinnerLabel"
+            app:layout_constraintTop_toBottomOf="@+id/dataset_name" />
 
+        <TextView
+            android:id="@+id/xAxisSpinnerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="X-Axis:"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/xAxisSpinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/xAxisSpinner" />
+
+        <ImageButton
+            android:id="@+id/spinnerRefreshButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:background="#00FFFFFF"
+            app:layout_constraintBottom_toBottomOf="@+id/xAxisSpinner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/xAxisSpinner"
+            app:srcCompat="@drawable/ic_baseline_refresh_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

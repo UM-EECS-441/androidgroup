@@ -40,30 +40,19 @@ class GraphActivity : AppCompatActivity() {
     private fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
         val graphData = ArrayList<AASeriesElement>()
+        val xAxisColumnName = DatabaseHelper(this).getXAxisColumnName(tableName)
+        val xValArray = data[xAxisColumnName] ?: ArrayList()
 
-        /*if (DatabaseHelper(this).databaseUsesDateAsX(tableName)) {
-            val timestamp = data["Timestamp"] ?: ArrayList<Any>()
-            for((key,value) in data) {
+        for((key,value) in data) {
 
-                if(key != "ID" && key != "Timestamp") {
-                    val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
-                        arrayOf(timestamp[it],(value[it] as String).toInt())
-                    })
-                    graphData.add(current)
-                }
+            if(key != "ID" && key != "Timestamp" && key != xAxisColumnName) {
+                val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
+                    arrayOf(xValArray[it],(value[it] as String).toInt())
+                })
+                graphData.add(current)
             }
-        } else {
-            val timestamp = data["Timestamp"] ?: ArrayList<Any>()
-            for((key,value) in data) {
+        }
 
-                if(key != "ID" && key != "Timestamp") {
-                    val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
-                        arrayOf(timestamp[it],(value[it] as String).toInt())
-                    })
-                    graphData.add(current)
-                }
-            }
-        }*/
 
 
         val chartModel = AAChartModel()

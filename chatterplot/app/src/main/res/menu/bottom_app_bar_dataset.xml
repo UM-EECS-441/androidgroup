@@ -12,7 +12,7 @@
         android:title="Switch to Graph"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/create_dataset"
+        android:id="@+id/insert_to_dataset"
         android:icon="@drawable/ic_add_24"
         android:title="Insert Data"
         app:showAsAction="ifRoom" />

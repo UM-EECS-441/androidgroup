@@ -16,11 +16,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/graph_frame"
     tools:context=".GraphActivity">
+
     <com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
         android:id="@+id/aa_chart_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?attr/actionBarSize"/>
+        android:layout_marginBottom="?attr/actionBarSize" />
     <com.google.android.material.bottomappbar.BottomAppBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,7 +30,7 @@
         style="@style/Widget.MaterialComponents.BottomAppBar"
         android:theme="@style/AppThemeMaterial"
         app:fabAlignmentMode="center"
-        app:menu="@menu/bottom_app_bar_main"
+        app:menu="@menu/bottom_app_bar_graph"
         app:layout_anchorGravity="bottom"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"

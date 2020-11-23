@@ -1,41 +1,31 @@
 package com.chatterplot
 
-import android.app.Activity
 import android.content.Context
-import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Typeface
 import android.icu.text.SimpleDateFormat
-import android.icu.util.UniversalTimeScale.toLong
-import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
-import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.setPadding
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class TableAdapter {
-    private lateinit var tableData: MutableMap<String, ArrayList<Any>> // data will be preloaded into this list from the db
+    private var tableData: MutableMap<String, ArrayList<Any>> // data will be preloaded into this list from the db
     private var tableView: TableLayout? = null
     var context: Context? = null
-    private lateinit var tableNameDB: String
-    private var graphedByDate: Boolean = true
+    private var tableNameDB: String
+    private var xAxisColName: String
 
     constructor(context: Context, tableNameDB: String) {
         this.context = context
         this.tableNameDB = tableNameDB
-        tableView = (this.context as DisplayDataActivity).findViewById<TableLayout>(R.id.dataDisplayTable)
-
+        tableView = (this.context as DisplayDataActivity).findViewById(R.id.dataDisplayTable)
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
+        xAxisColName = DatabaseHelper(this.context!!).getXAxisColumnName(tableNameDB)
+
 //        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
 //
 //        val pullDataQuery: String = ""  //TODO write the actual query dependent on schema
@@ -78,22 +68,27 @@ class TableAdapter {
     fun loadTable() {
         //TODO add title row with column names
         tableView?.removeAllViews()
-        //Log.e("DateIndexed", graphedByDate.toString())
 
+        val graphedByDate = (xAxisColName == "Timestamp")
         if (!graphedByDate) {
-            var titleRow: TableRow = createTableRow(tableData.keys.size - 2)
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 2) //exclude ID and timestamp rows
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
             titleRow.layoutParams = rowLayoutParams
 
-            var i = 0
+            var i = 1
             for ((colKey, _) in tableData) {
                 if (colKey != "ID" && colKey != "Timestamp") {
-                    var rowNum: TextView = titleRow.getChildAt(i) as TextView
-                    rowNum.text = colKey.toString()
-                    rowNum.setTypeface(null, Typeface.BOLD)
-                    ++i
+                    var rowText: TextView
+                    if (colKey == xAxisColName) {
+                        rowText = titleRow.getChildAt(0) as TextView
+                    } else {
+                        rowText = titleRow.getChildAt(i) as TextView
+                        ++i
+                    }
+                    rowText.text = colKey
+                    rowText.setTypeface(null, Typeface.BOLD)
                 }
             }
             (tableView as ViewGroup).addView(titleRow)
@@ -105,12 +100,17 @@ class TableAdapter {
                     TableRow.LayoutParams.WRAP_CONTENT)
                 newRow.layoutParams = rowLayoutParams
 
-                var colNum: Int = 0
+                var colNum = 1
                 for ((colKey, colData) in tableData) {
                     if (colKey != "ID" && colKey != "Timestamp") {
-                        var rowText: TextView = newRow.getChildAt(colNum) as TextView
+                        var rowText: TextView
+                        if (colKey == xAxisColName) {
+                            rowText = newRow.getChildAt(0) as TextView
+                        } else {
+                            rowText = newRow.getChildAt(colNum) as TextView
+                            ++colNum
+                        }
                         rowText.text = colData[row].toString()
-                        ++colNum
                     }
                 }
                 (tableView as ViewGroup).addView(newRow)

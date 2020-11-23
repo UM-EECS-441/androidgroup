@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -186,6 +187,9 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         db.execSQL("DELETE FROM DATASET WHERE TableName='$tableName'")
         db.execSQL("DROP TABLE '$tableName'")
+
+        // Delete the preview file
+        File(context.filesDir, tableName).delete()
     }
 
     fun getAllDatabase(): ArrayList<String> {

@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognitionListener
@@ -28,6 +29,7 @@ import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_dataset_list.*
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private val permission = 10
@@ -100,8 +102,15 @@ class MainActivity : AppCompatActivity() {
         val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
         val cardList = ArrayList<DatasetCard>()
         for (i in 0 until datasetNameList.size) {
-            val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
-            cardList.add(newCard)
+            val img = File(this.filesDir, "${datasetNameList[i]}.png")
+            if(img.isFile) {
+                val drawableImg = Drawable.createFromPath(img.absolutePath)
+                val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i], drawableImg)
+                cardList += newCard
+            } else {
+                val newCard = DatasetCard(R.drawable.graph_placeholder, datasetNameList[i])
+                cardList += newCard
+            }
         }
         return cardList
     }
@@ -156,12 +165,6 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-
-//        search_bar.setOnCloseListener {
-//            Log.e("closed", "closeed")
-//            this.currentFocus?.clearFocus()
-//            true
-//        }
         return true
     }
 
@@ -175,26 +178,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-//    fun showCreateDialog(v: View?) {
-//        val createDialog = layoutInflater.inflate(R.layout.create_table_view, null)
-//        val datasetName = createDialog.findViewById<EditText>(R.id.datasetName)
-//        val datasetIndependent = createDialog.findViewById<EditText>(R.id.datasetIndependent)
-//        val datasetDependent = createDialog.findViewById<EditText>(R.id.datasetDependent)
-//
-//        val alertDialog = AlertDialog.Builder(this)
-//        alertDialog.setTitle("Create new dataset")
-//        alertDialog.setView(createDialog)
-//        alertDialog.setNegativeButton("Cancel", null)
-//        alertDialog.setPositiveButton("Create")  {dialog, which ->
-//            val tableName = datasetName.text.toString()
-//            val xAxis = datasetIndependent.text.toString()
-//            val yAxis = datasetDependent.text.toString()
-//            DatabaseHelper(this).createDataset(tableName, xAxis, yAxis)
-//
-//        }
-//        alertDialog.create().show()
-//    }
 
     fun showAllDatabase(v:View?) {
         val intent = Intent(this, DatabaseActivity::class.java)

@@ -32,8 +32,13 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
     override fun onBindViewHolder(holder: DatasetViewHolder, position: Int) {
         val currentItem = datasetCardList[position]
+        if(currentItem.preview == null) {
+            holder.imageView.setImageResource(currentItem.imageResource)
+        }
+        else {
+            holder.imageView.setImageDrawable(currentItem.preview)
+        }
 
-        holder.imageView.setImageResource(currentItem.imageResource)
         holder.textView.text = currentItem.name
         val context = holder.itemView.context
 
@@ -81,7 +86,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
     fun filter(query: String?) {
         if(query.isNullOrEmpty()) {
-            datasetCardList.addAll(datasetListCopy)
+            datasetCardList = ArrayList(datasetListCopy)
         } else {
             datasetCardList.clear()
             for(item in datasetListCopy) {

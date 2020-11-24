@@ -66,7 +66,7 @@ class DisplayDataActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
-                R.id.create_dataset -> {
+                R.id.insert_to_dataset -> {
                     val intent = Intent(this, InsertDataActivity::class.java)
                     intent.putExtra("DATASETNAME", tableName)
                     startActivityForResult(intent, INSERT_REQUEST_CODE)

@@ -9,10 +9,10 @@
     <item
         android:id="@+id/graph_dataset"
         android:icon="@drawable/graph_placeholder"
-        android:title="Switch to graph"
-        app:showAsAction="ifRoom"/>
+        android:title="Switch to Graph"
+        app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/create_dataset"
+        android:id="@+id/insert_to_dataset"
         android:icon="@drawable/ic_add_24"
         android:title="Add data"
         app:showAsAction="ifRoom"/>

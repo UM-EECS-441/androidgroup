@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.icu.text.SimpleDateFormat
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -85,15 +86,17 @@ class GraphActivity : AppCompatActivity() {
 
         }
     }
-    fun graphDataset() {
+    private fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
         val graphData = ArrayList<AASeriesElement>()
-        val timestamp = data["Timestamp"] ?: ArrayList<Any>()
+        val xAxisColumnName = DatabaseHelper(this).getXAxisColumnName(tableName)
+        val xValArray = data[xAxisColumnName] ?: ArrayList()
 
         for((key,value) in data) {
-            if(key != "ID" && key != "Timestamp") {
+
+            if(key != "ID" && key != "Timestamp" && key != xAxisColumnName) {
                 val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
-                    arrayOf(timestamp[it],(value[it] as String).toInt())
+                    arrayOf(xValArray[it],(value[it] as String).toInt())
                 })
                 graphData.add(current)
             }

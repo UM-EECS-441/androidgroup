@@ -14,6 +14,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -38,6 +39,11 @@ import java.io.InputStreamReader
 
 class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var columns: ArrayList<View>
+
+    lateinit var spin: Spinner
+    lateinit var adapter: ArrayAdapter<String>
+    lateinit var refreshButton: ImageButton
+
     private lateinit var progressBar: ProgressBar
     private val READ_PERMISSION = 20
     private val IMPORT_REQUEST = 10
@@ -48,9 +54,6 @@ class CreateDatasetActivity : AppCompatActivity() {
     var isImporting = 0
     val importingProcess = ConditionVariable(true)
 
-    lateinit var graphedBy: RadioGroup
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_dataset)
@@ -58,11 +61,19 @@ class CreateDatasetActivity : AppCompatActivity() {
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
 
+        spin = findViewById(R.id.xAxisSpinner)
+        adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayListOf("Timestamp"))
+        refreshButton = findViewById<ImageButton>(R.id.spinnerRefreshButton)
+        spin.adapter = adapter
+
+        disableSpinner()
+
+        refreshButton.setOnClickListener {
+            refreshButton.animate().setDuration(250).rotationBy(360f).start()
+            updateSpinner()
+        }
+
         progressBar = findViewById(R.id.import_progress_bar)
-
-
-        graphedBy = findViewById(R.id.xAxisRadioGroup)
-
 
         val addButton = findViewById<Button>(R.id.add_column_button)
         addButton.setOnClickListener { v ->
@@ -86,6 +97,39 @@ class CreateDatasetActivity : AppCompatActivity() {
     }
 
     private fun addColumn(view: View?) {
+    // Updates the X-Axis selection spinner to include all named columns as long as
+    // there are more than 1 columns
+    private fun updateSpinner() {
+        adapter.clear()
+        adapter.add("Timestamp")
+
+        for (col in columns) {
+            val colname = col.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
+            if (colname != "") {
+                adapter.add(colname)
+            }
+        }
+        if (columns.size > 1) {
+            enableSpinner()
+        } else {
+            disableSpinner()
+        }
+    }
+
+    private fun enableSpinner() {
+        spin.isEnabled = true
+        spin.alpha = 1f
+        refreshButton.isEnabled = true
+    }
+
+    private fun disableSpinner() {
+        spin.isEnabled = false
+        spin.alpha = 0.75f
+        spin.setSelection(0)
+        refreshButton.isEnabled = false
+    }
+
+    private fun addColumn(view : View?) {
         if(view == null) return
         if(columns.size >= 5) {
             Snackbar.make(view, "Cannot create more than 5 columns", Snackbar.LENGTH_LONG).show()
@@ -101,7 +145,8 @@ class CreateDatasetActivity : AppCompatActivity() {
         setter.applyTo(inputs)
         columns.add(layout)
 
-        graphedBy.visibility = View.VISIBLE
+        updateSpinner()
+        Log.v("Spinner", "Updated")
 
 //        Snackbar.make(view, "Created a column", Snackbar.LENGTH_LONG)
 //            .setAction("Undo") {
@@ -129,13 +174,8 @@ class CreateDatasetActivity : AppCompatActivity() {
         return layout
     }
 
-
     private fun deleteInputField(tag: Int) {
         if(columns.size == 1 || tag >= columns.size) return
-        if(columns.size == 2) {
-            graphedBy.visibility = View.INVISIBLE
-            graphedBy.check(R.id.dateAsX)
-        }
         val parent = findViewById<ConstraintLayout>(R.id.create_input_fields)
         parent.removeView(columns[tag])
         if(tag != columns.size - 1) {
@@ -157,6 +197,9 @@ class CreateDatasetActivity : AppCompatActivity() {
             val deleteBtn = columns[i].findViewById<ImageButton>(R.id.delete_button)
             deleteBtn.tag = i
         }
+
+        updateSpinner()
+        Log.e("Spinner", "Updated")
     }
 
     private fun createDataset() {
@@ -165,7 +208,6 @@ class CreateDatasetActivity : AppCompatActivity() {
             Toast.makeText(this, "Name of the dataset must be specified", Toast.LENGTH_LONG).show()
             return
         }
-
         val schema = Schema(name)
         for(column in columns) {
             val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
@@ -176,13 +218,11 @@ class CreateDatasetActivity : AppCompatActivity() {
             schema.addColumn(colName, "INT")
         }
 
-        //Check if graphing by column is selected and set schema value accordingly.
-        //Graphing by date is true by default, so it is not checked
-        val selectedID = graphedBy.checkedRadioButtonId
-        if (selectedID == R.id.col1AsX) schema.isGraphedByDate(false)
+
+        schema.setXAxisColumn(spin.selectedItem.toString())
+        Log.v("Spin", "Selected "+spin.selectedItem.toString())
 
         DatabaseHelper(this).createTable(schema)
-
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)
         setResult(Activity.RESULT_OK, resultIntent)

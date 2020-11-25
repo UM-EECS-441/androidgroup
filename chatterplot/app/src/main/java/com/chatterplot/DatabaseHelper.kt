@@ -132,6 +132,15 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.endTransaction()
     }
 
+    fun editValue(tableName: String, row: Int, column: String, value: String) {
+        val db = this.writableDatabase
+        var newValues: ContentValues = ContentValues()
+        newValues.put(column, value)
+        newValues.put("Timestamp", Instant.now().toEpochMilli())
+        db.update(tableName, newValues, "ID=$row", null)
+        updateTimestamp(tableName)
+    }
+
     fun deleteRow(tableName:String, where:String?, args:Array<String>?) {
         val db = this.writableDatabase
         db.delete(tableName, where, args)

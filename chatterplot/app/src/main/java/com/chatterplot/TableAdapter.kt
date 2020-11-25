@@ -3,8 +3,14 @@ package com.chatterplot
 import android.content.Context
 import android.graphics.Typeface
 import android.icu.text.SimpleDateFormat
+import android.os.Bundle
+import android.text.InputType
+import android.util.Log
 import android.util.TypedValue
+import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -48,6 +54,7 @@ class TableAdapter {
         xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
         loadTable()
     }
+
 
     /*
     * Loads table in context with id dataDisplayTable with data from the dataset determined by
@@ -149,11 +156,40 @@ class TableAdapter {
         }
     }
 
-    private fun createTableRow(numColumns: Int): TableRow {
+
+    private fun createTableRow(numColumns: Int, firstRow: Boolean =false): TableRow {
         var row = TableRow(context)
         row.setPadding(5)
         for (i in 1..numColumns) {
             var item = TextView(context)
+            item.isFocusable = true
+            if (!firstRow) {
+                item.setOnClickListener { v ->
+                    var currTextView: TextView = v as TextView
+                    currTextView.isCursorVisible = true
+                    currTextView.isFocusableInTouchMode = true
+                    currTextView.inputType = InputType.TYPE_CLASS_NUMBER
+                    currTextView.requestFocus()  //to trigger the soft input
+                }
+
+                item.setOnEditorActionListener { v, actionId, event ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        val row = (v as View).getTag(R.id.TAG_DB_ROW)!! as Int + 1
+                        val column = (v as View).getTag(R.id.TAG_DB_COL)!! as String
+                        // update the value in the database to match the inputted
+                        // key 0 is for row , key 1 is for column name
+                        DatabaseHelper(this.context!!).editValue(
+                            this.tableNameDB,
+                            row,
+                            column,
+                            v.text.toString()
+                        )
+                        true
+                    }
+                    false
+                }
+            }
+
             row.addView(item)
             item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
             (item.layoutParams as TableRow.LayoutParams).weight = 1f

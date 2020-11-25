@@ -168,8 +168,10 @@ class TableAdapter {
     fun getDataRow(row: Int): List<Any> {
         var data: ArrayList<Any> = arrayListOf()
         for ((colHeader, colData) in tableData) {
-            if (colHeader != "ID" && colHeader != "Timestamp") {
-                data.add(colData[row])
+            if (colHeader != "ID") {
+                if (colHeader != "Timestamp" || DatabaseHelper(this.context!!).getXAxisColumnName(tableNameDB) == "Timestamp") {
+                    data.add(colData[row])
+                }
             }
         }
         return data.toList()

@@ -128,15 +128,17 @@ class DisplayDataActivity : AppCompatActivity() {
 
             // write col headers
             var headerVals = adapter.getColumnNames()
-            var header: String = ""
+            var header = ""
             for (i in headerVals.indices) {
 
-                // don't write ID or Timestamp columns
-                if (headerVals[i] != "ID" && headerVals[i] != "Timestamp") {
-                    header += headerVals[i]
-                    if (i != headerVals.size - 1) {
-                        // add comma except for last element
-                        header += ","
+                // don't write ID column or Timestamp unless graphed by time
+                if (headerVals[i] != "ID") {
+                    if (headerVals[i] != "Timestamp" || DatabaseHelper(this).getXAxisColumnName(tableName) == "Timestamp") {
+                        header += headerVals[i]
+                        if (i != headerVals.size - 1) {
+                            // add comma except for last element
+                            header += ","
+                        }
                     }
                 }
             }
@@ -151,7 +153,7 @@ class DisplayDataActivity : AppCompatActivity() {
             writer.close()
         }
         else {
-            Log.d("herehere", "damn it")
+            Log.d("herehere", "damn it") //lol
         }
 
         // edit document using documentURI

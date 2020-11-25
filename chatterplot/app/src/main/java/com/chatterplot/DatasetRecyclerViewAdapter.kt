@@ -2,6 +2,7 @@ package com.chatterplot
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,12 +15,12 @@ import kotlinx.android.synthetic.main.dataset_card.view.*
 
 
 open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
-    private lateinit var datasetListCopy: ArrayList<DatasetCard>
+    private var datasetListCopy = ArrayList(datasetCardList)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
             parent, false)
-        datasetListCopy = ArrayList()
-        datasetListCopy.addAll(datasetCardList)
+
         return DatasetViewHolder(itemView)
     }
 

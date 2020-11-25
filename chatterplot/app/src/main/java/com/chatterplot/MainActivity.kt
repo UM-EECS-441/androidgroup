@@ -46,8 +46,9 @@ class MainActivity : AppCompatActivity() {
         val datasetList = getDatabases()
 
         recycler_view  = findViewById(R.id.recycler_view)
-        recycler_view.adapter = DatasetRecyclerViewAdapter(datasetList)
         recycler_view.layoutManager = LinearLayoutManager(this)
+        val recycleAdapt = DatasetRecyclerViewAdapter(datasetList)
+        recycler_view.adapter = recycleAdapt
 
 
         if(ContextCompat.checkSelfPermission(this@MainActivity,

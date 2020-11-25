@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/column_input"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -17,7 +16,7 @@
         android:layout_marginBottom="8dp"
         android:layout_toStartOf="@id/delete_button"
         android:theme="@style/AppThemeMaterial"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"

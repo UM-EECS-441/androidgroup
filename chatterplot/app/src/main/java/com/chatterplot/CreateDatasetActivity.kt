@@ -2,18 +2,11 @@ package com.chatterplot
 
 import android.Manifest
 import android.app.Activity
-import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.ConditionVariable
-import android.os.Environment
-import android.provider.DocumentsContract
-import android.provider.MediaStore
-import android.provider.OpenableColumns
-import android.util.Log
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -22,7 +15,6 @@ import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -31,10 +23,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.activity_create_dataset.*
-
 import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
 import java.io.InputStreamReader
 
 class CreateDatasetActivity : AppCompatActivity() {
@@ -52,7 +41,7 @@ class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var inputColumn: ArrayList<ArrayList<String>>
     // 0 = not importing, 1 = importing in process, 2 = importing done
     var isImporting = 0
-    val importingProcess = ConditionVariable(true)
+    private val importingProcess = ConditionVariable(true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +59,7 @@ class CreateDatasetActivity : AppCompatActivity() {
 
         refreshButton.setOnClickListener {
             refreshButton.animate().setDuration(250).rotationBy(360f).start()
-            updateSpinner()
+            updateSpinner(false)
         }
 
         progressBar = findViewById(R.id.import_progress_bar)
@@ -96,12 +85,11 @@ class CreateDatasetActivity : AppCompatActivity() {
         columns.add(inputField)
     }
 
-    private fun addColumn(view: View?) {
     // Updates the X-Axis selection spinner to include all named columns as long as
     // there are more than 1 columns
-    private fun updateSpinner() {
+    private fun updateSpinner(isImport: Boolean) {
         adapter.clear()
-        adapter.add("Timestamp")
+        if (!isImport) adapter.add("Timestamp")
 
         for (col in columns) {
             val colname = col.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
@@ -145,7 +133,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         setter.applyTo(inputs)
         columns.add(layout)
 
-        updateSpinner()
+        updateSpinner(false)
         Log.v("Spinner", "Updated")
 
 //        Snackbar.make(view, "Created a column", Snackbar.LENGTH_LONG)
@@ -160,7 +148,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         val layout = inflater.inflate(R.layout.column_input_field, null, false)
         layout.id = View.generateViewId()
         val textInput = layout.findViewById<TextInputLayout>(R.id.column_input)
-        textInput.hint = "Column ${columns.size+1} Name"
+        textInput.hint = "Column ${columns.size+1}"
         val deleteBtn = layout.findViewById<ImageButton>(R.id.delete_button)
         if(!isDeletable) {
             deleteBtn.visibility = View.INVISIBLE
@@ -193,12 +181,12 @@ class CreateDatasetActivity : AppCompatActivity() {
         columns.removeAt(tag)
         for(i in tag until columns.size) {
             val textInput = columns[i].findViewById<TextInputLayout>(R.id.column_input)
-            textInput.hint = "Column ${i+1} Name"
+            textInput.hint = "Column ${i+1}"
             val deleteBtn = columns[i].findViewById<ImageButton>(R.id.delete_button)
             deleteBtn.tag = i
         }
 
-        updateSpinner()
+        updateSpinner(false)
         Log.e("Spinner", "Updated")
     }
 
@@ -346,6 +334,7 @@ class CreateDatasetActivity : AppCompatActivity() {
             if (idx == 0) {
                 runOnUiThread {
                     findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
+                    updateSpinner(true)
                 }
             } else if (idx < columns.size) {
                 runOnUiThread {

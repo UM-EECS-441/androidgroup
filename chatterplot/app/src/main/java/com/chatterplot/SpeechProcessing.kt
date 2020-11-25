@@ -7,32 +7,43 @@ import android.widget.Toast
 
 class SpeechProcessor(ctext: Context) {
     var context = ctext
-    var name = "Dataset"
+    var name: String? = " "
 
-    fun textProcessing(text: String, tableName: String?):Boolean {
+    fun textProcessing(text: String, tableName: String?):Int {
         if (this.createDataset(text)) {
             Log.i("SpeechRecognizer","created dataset")
-            return true
-        } else if (tableName != null && this.insertDataset(text, tableName)) {
-            Log.i("SpeechRecognizer","inserted data to dataset: ".plus(tableName))
-            return true
+            return 1
+        } else if (this.insertDataset(text, tableName)) {
+            Log.i("SpeechRecognizer","inserted data to dataset: ".plus(name))
+            return 2
         } else {
             Log.i("SpeechRecognizer","command not recognized")
             Toast.makeText(context, "Command not recognized", Toast.LENGTH_SHORT).show()
-            return false
+            return 0
         }
     }
 
-    private fun insertDataset(text:String, tableName:String):Boolean {
+    private fun insertDataset(text:String, tableName:String?):Boolean {
         if((text.contains("insert") || text.contains("add") ||
                     text.contains("enter"))) {
             val words= text.split(" ").toMutableList()
 //            val numbers = ArrayList<Int>()
             words.removeAt(0)
+            name = tableName
+            if (tableName == null) {
+                val idx = text.indexOf("into")
+                if (idx == -1 || idx + 5 >= text.length) return false
+                name = text.substring(idx + 5).capitalize()
+                if (!DatabaseHelper(context).getAllDatabaseNames().contains(name!!)) {
+                    return false
+                }
+                Log.i("SpeechRecognizer", "dataset name: ".plus(name))
+            }
             val data = ArrayList<String>()
             for(word in words) {
-                if(word != "and" && word != "+") {
-                    if(word.toIntOrNull() ==null) {
+                if (word == "into") break
+                if (word != "and" && word != "+") {
+                    if(word.toIntOrNull() == null) {
                         return false
                     }
                     else {
@@ -41,7 +52,7 @@ class SpeechProcessor(ctext: Context) {
                 }
 //                numbers.add(words[idx].toIntOrNull() ?: return false)
             }
-            DatabaseHelper(context).insertRow(tableName, data)
+            DatabaseHelper(context).insertRow(name!!, data)
             return true
         }
         return false
@@ -51,11 +62,10 @@ class SpeechProcessor(ctext: Context) {
         if ((text.contains("make") || text.contains("create") ||
                     text.contains("new") || text.contains("start")) &&
             text.contains("data")) {
-            name = " "
             var nameStart = text.length
             var nameEnd = text.length
-            var numColumns = 0
-            var columnNames = arrayListOf<String>()
+            var numColumns: Int = 0
+            var columnNames = mutableListOf<String>()
             try {
                 for ((idx, word) in text.split(" ").withIndex()) {
                     Log.i("SpeechRecognizer", "text response word: ".plus(word))
@@ -69,7 +79,10 @@ class SpeechProcessor(ctext: Context) {
                             numColumns = textList[idx - 1].toInt()
                         } catch (e:Exception) {
                             numColumns = this.textToInt(textList[idx - 1])
-                            if (numColumns == -1) throw Exception("Invalid column number")
+                            if (numColumns == -1 || numColumns > 5) {
+                                Toast.makeText(context, "Invalid column number", Toast.LENGTH_SHORT).show()
+                                throw Exception("Invalid column number")
+                            }
                         }
                         var columnCount = 0
                         for (i in (idx + 2) until textList.size) {
@@ -77,6 +90,9 @@ class SpeechProcessor(ctext: Context) {
                             if (textList[i] == "and" || textList[i] == "+") continue
                             columnNames.add(textList[i])
                             columnCount += 1
+                        }
+                        if (columnCount == 0) {
+                            columnNames = arrayListOf("A", "B", "C", "D", "E").take(numColumns).toMutableList()
                         }
                         Log.i("SpeechRecognizer", "column names: ".plus(columnNames.joinToString(" ")))
                         break
@@ -88,9 +104,9 @@ class SpeechProcessor(ctext: Context) {
                 // Run create dataset function
 
                 if (columnNames.isEmpty()) {
-                    DatabaseHelper(context).createDataset(name, arrayListOf("Y"))
+                    DatabaseHelper(context).createDataset(name!!, mutableListOf<String>("Y"))
                 } else {
-                    DatabaseHelper(context).createDataset(name, columnNames)
+                    DatabaseHelper(context).createDataset(name!!, columnNames)
                 }
                 Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
                 Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()

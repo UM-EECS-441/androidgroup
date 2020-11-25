@@ -102,8 +102,8 @@ class MainActivity : AppCompatActivity() {
 //                textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if (speechProcessor.textProcessing(res[0], null)) {
-                    (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name)
+                if (speechProcessor.textProcessing(res[0], null) == 1) {
+                    (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name!!)
                 }
             }
         }

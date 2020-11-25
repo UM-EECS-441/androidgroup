@@ -116,7 +116,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         for(row in values){
             val sqlval = ContentValues()
             for(i in 0 until row.size) {
-                sqlval.put("[${colNames[i+1]}]", row[i])
+                sqlval.put("[${colNames[i+2]}]", row[i])
             }
             sqlval.put("Timestamp", time)
             db.insertOrThrow("[$tableName]", null, sqlval)

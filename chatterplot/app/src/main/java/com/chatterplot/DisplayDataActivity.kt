@@ -73,7 +73,9 @@ class DisplayDataActivity : AppCompatActivity() {
                     true
                 }
                 R.id.setting_dataset -> {
-                    Toast.makeText(this, "Setting not implemented yet", Toast.LENGTH_LONG).show()
+                    val intent = Intent(this, DatasetConfigActivity::class.java)
+                    intent.putExtra("DATASETNAME", tableName)
+                    startActivity(intent)
                     true
                 }
                 R.id.export_data_button -> {

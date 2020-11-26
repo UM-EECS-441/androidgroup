@@ -80,10 +80,10 @@ class MainActivity : AppCompatActivity() {
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
             when(menuItem.itemId) {
-                R.id.search_dataset -> {
+                /*R.id.search_dataset -> {
                     Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
                     true
-                }
+                }*/
                 R.id.create_dataset -> {
                     val intent = Intent(this, CreateDatasetActivity::class.java)
                     startActivityForResult(intent, CREATE_REQUEST_CODE)

@@ -26,9 +26,14 @@ class Schema(val name: String) {
     }
 }
 
+// TimeFormat Codes using SimpleDateFormat:
+// 0 - Unix Epoch Milliseconds (no conversion)
+// 1 - MM/dd/YYYY
+// 2 - MM/dd/YY HH:mm
+
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT)"
+        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT, TimeFormat INTEGER)"
         db!!.execSQL(sqlQuery)
         Log.d("SQL", "Created DATASET table")
     }

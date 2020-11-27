@@ -4,6 +4,7 @@ package com.chatterplot
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -80,6 +81,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+        Log.i("speechRecognizer", data.toString())
+        if (data.toString() == "chatterplot://voice") {
+            startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         }
     }
 

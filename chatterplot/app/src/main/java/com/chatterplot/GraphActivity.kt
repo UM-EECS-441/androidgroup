@@ -41,15 +41,15 @@ class GraphActivity : AppCompatActivity() {
         setContentView(R.layout.activity_graph)
         tableName = intent.getStringExtra("DATASETNAME")
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
-        preview = AAChartView(this)
-        preview.layout(0, 0, 1000, 400)
-
+//        preview = AAChartView(this)
+//        preview.layout(0, 0, 1000, 400)
+        createPreview(this, tableName)
         graphDataset()
-
-        Handler().postDelayed({
-            val bitmap = convertViewToBitmap(preview as View)
-            saveBitmap(this, bitmap, "$tableName.png")
-        }, 5000)
+//
+//        Handler().postDelayed({
+//            val bitmap = convertViewToBitmap(preview as View)
+//            saveBitmap(this, bitmap, "$tableName.png")
+//        }, 5000)
 
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
@@ -112,15 +112,15 @@ class GraphActivity : AppCompatActivity() {
 //            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
 
-        preview.aa_drawChartWithChartModel(chartModel
-            .legendEnabled(false)
-            .yAxisLabelsEnabled(false)
-            .title("")
-            .yAxisTitle("")
-            .dataLabelsEnabled(false)
-            .xAxisTickInterval(0)
-            .yAxisGridLineWidth(0F)
-            .xAxisVisible(false))
+//        preview.aa_drawChartWithChartModel(chartModel
+//            .legendEnabled(false)
+//            .yAxisLabelsEnabled(false)
+//            .title("")
+//            .yAxisTitle("")
+//            .dataLabelsEnabled(false)
+//            .xAxisTickInterval(0)
+//            .yAxisGridLineWidth(0F)
+//            .xAxisVisible(false))
     }
 
 //    fun createLineChart() {

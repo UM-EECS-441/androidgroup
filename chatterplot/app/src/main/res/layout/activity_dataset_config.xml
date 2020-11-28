@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/saveConfigButton"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DatasetConfigActivity">
@@ -60,5 +61,14 @@
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="@+id/xAxisConfigSpinnerLabel"
         app:layout_constraintTop_toBottomOf="@+id/xAxisConfigSpinnerLabel" />
+
+    <Button
+        android:id="@+id/configSaveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Save"
+        app:layout_constraintEnd_toEndOf="@+id/timeFormatConfigSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/timeFormatConfigSpinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

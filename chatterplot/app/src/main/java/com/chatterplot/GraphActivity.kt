@@ -1,32 +1,17 @@
 package com.chatterplot
 
-import android.icu.text.SimpleDateFormat
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.provider.MediaStore
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import android.webkit.MimeTypeMap
-import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
-import androidx.core.view.postDelayed
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AASeries
-import com.github.aachartmodel.aainfographics.aaoptionsmodel.AAXAxis
 import com.google.android.material.bottomappbar.BottomAppBar
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -89,7 +74,7 @@ class GraphActivity : AppCompatActivity() {
     private fun graphDataset() {
         val data = DatabaseHelper(this).getTable(tableName)
         val graphData = ArrayList<AASeriesElement>()
-        val xAxisColumnName = DatabaseHelper(this).getXAxisColumnName(tableName)
+        val xAxisColumnName = DatabaseHelper(this).getXAxisColumn(tableName)
         val xValArray = data[xAxisColumnName] ?: ArrayList()
 
         for((key,value) in data) {

@@ -24,7 +24,7 @@ class TableAdapter {
         this.tableNameDB = tableNameDB
         tableView = (this.context as DisplayDataActivity).findViewById(R.id.dataDisplayTable)
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
-        xAxisColName = DatabaseHelper(this.context!!).getXAxisColumnName(tableNameDB)
+        xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
 
 //        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
 //
@@ -119,7 +119,7 @@ class TableAdapter {
                     ++i
                 } else if (colKey == "Timestamp") { //Date directly set to first column
                     var rowNum: TextView = titleRow.getChildAt(0) as TextView
-                    rowNum.text = "Date"
+                    rowNum.text = "Time"
                     rowNum.setTypeface(null, Typeface.BOLD)
                 }
             }
@@ -140,9 +140,7 @@ class TableAdapter {
                         ++colNum
                     } else if (colKey == "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(0) as TextView
-                        val sdf = SimpleDateFormat("MM/dd/yy")
-                        val netDate = Date(colData[row] as Long)
-                        rowNum.text = sdf.format(netDate)
+                        rowNum.text = DatabaseHelper(this.context!!).formatTime(tableNameDB, colData[row] as Long)
                     }
                 }
                 (tableView as ViewGroup).addView(newRow)
@@ -169,7 +167,7 @@ class TableAdapter {
         var data: ArrayList<Any> = arrayListOf()
         for ((colHeader, colData) in tableData) {
             if (colHeader != "ID") {
-                if (colHeader != "Timestamp" || DatabaseHelper(this.context!!).getXAxisColumnName(tableNameDB) == "Timestamp") {
+                if (colHeader != "Timestamp" || DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB) == "Timestamp") {
                     data.add(colData[row])
                 }
             }

@@ -1,6 +1,6 @@
 package com.chatterplot
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -8,16 +8,10 @@ import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.util.Log
 import android.view.MenuItem
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.sql.Timestamp
-import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
-import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import java.io.BufferedWriter
-import java.io.File
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 
@@ -27,6 +21,7 @@ class DisplayDataActivity : AppCompatActivity() {
     private val INSERT_REQUEST_CODE = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private val EXPORT_LOC_REQUEST_CODE = 30
+    private val CONFIG_REQUEST_CODE = 40
     private lateinit var tableName:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +70,7 @@ class DisplayDataActivity : AppCompatActivity() {
                 R.id.setting_dataset -> {
                     val intent = Intent(this, DatasetConfigActivity::class.java)
                     intent.putExtra("DATASETNAME", tableName)
-                    startActivity(intent)
+                    startActivityForResult(intent, CONFIG_REQUEST_CODE)
                     true
                 }
                 R.id.export_data_button -> {
@@ -135,7 +130,7 @@ class DisplayDataActivity : AppCompatActivity() {
 
                 // don't write ID column or Timestamp unless graphed by time
                 if (headerVals[i] != "ID") {
-                    if (headerVals[i] != "Timestamp" || DatabaseHelper(this).getXAxisColumnName(tableName) == "Timestamp") {
+                    if (headerVals[i] != "Timestamp" || DatabaseHelper(this).getXAxisColumn(tableName) == "Timestamp") {
                         header += headerVals[i]
                         if (i != headerVals.size - 1) {
                             // add comma except for last element
@@ -186,6 +181,9 @@ class DisplayDataActivity : AppCompatActivity() {
                     adapter.refreshTable()
                 }
             }
+        }
+        else if (requestCode == CONFIG_REQUEST_CODE && resultCode == RESULT_OK) {
+            adapter.refreshTable() //Why is this not updating the table?
         }
         else if (requestCode == EXPORT_LOC_REQUEST_CODE && resultCode == RESULT_OK
             && data != null) {

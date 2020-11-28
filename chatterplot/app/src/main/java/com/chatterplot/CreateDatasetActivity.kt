@@ -36,7 +36,7 @@ class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private val READ_PERMISSION = 20
     private val IMPORT_REQUEST = 10
-    private var inputName = "Imported"
+    // private var inputName = "Imported"
 //    private lateinit var inputColumnLabel: ArrayList<String>
     private lateinit var inputColumn: ArrayList<ArrayList<String>>
     // 0 = not importing, 1 = importing in process, 2 = importing done

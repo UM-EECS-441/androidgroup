@@ -45,6 +45,7 @@ class TableAdapter {
 
     fun refreshTable() {
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
+        xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
         loadTable()
     }
 

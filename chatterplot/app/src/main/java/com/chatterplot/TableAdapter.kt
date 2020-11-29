@@ -3,8 +3,14 @@ package com.chatterplot
 import android.content.Context
 import android.graphics.Typeface
 import android.icu.text.SimpleDateFormat
+import android.os.Bundle
+import android.text.InputType
+import android.util.Log
 import android.util.TypedValue
+import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -49,6 +55,7 @@ class TableAdapter {
         loadTable()
     }
 
+
     /*
     * Loads table in context with id dataDisplayTable with data from the dataset determined by
     * columnNameDB
@@ -59,7 +66,7 @@ class TableAdapter {
 
         val graphedByDate = (xAxisColName == "Timestamp")
         if (!graphedByDate) {
-            var titleRow: TableRow = createTableRow(tableData.keys.size - 2) //exclude ID and timestamp rows
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 2, true) //exclude ID and timestamp rows
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
@@ -105,7 +112,7 @@ class TableAdapter {
             }
         } else {
 
-            var titleRow: TableRow = createTableRow(tableData.keys.size - 1)
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 1, true)
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
@@ -138,10 +145,14 @@ class TableAdapter {
                     if (colKey != "ID" && colKey != "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(colNum) as TextView
                         rowNum.text = colData[row].toString()
+                        rowNum.setTag(R.id.TAG_DB_ROW, row)  // 0: row, 1: column name
+                        rowNum.setTag(R.id.TAG_DB_COL, colKey)
                         ++colNum
                     } else if (colKey == "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(0) as TextView
                         rowNum.text = DatabaseHelper(this.context!!).formatTime(tableNameDB, colData[row] as Long)
+                        rowNum.setTag(R.id.TAG_DB_ROW, row)  // 0: row, 1: column name
+                        rowNum.setTag(R.id.TAG_DB_COL, colKey)
                     }
                 }
                 (tableView as ViewGroup).addView(newRow)
@@ -149,11 +160,40 @@ class TableAdapter {
         }
     }
 
-    private fun createTableRow(numColumns: Int): TableRow {
+
+    private fun createTableRow(numColumns: Int, firstRow: Boolean =false): TableRow {
         var row = TableRow(context)
         row.setPadding(5)
         for (i in 1..numColumns) {
             var item = TextView(context)
+            item.isFocusable = true
+            if (!firstRow) {
+                item.setOnClickListener { v ->
+                    var currTextView: TextView = v as TextView
+                    currTextView.isCursorVisible = true
+                    currTextView.isFocusableInTouchMode = true
+                    currTextView.inputType = InputType.TYPE_CLASS_NUMBER
+                    currTextView.requestFocus()  //to trigger the soft input
+                }
+
+                item.setOnEditorActionListener { v, actionId, event ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        val row = (v as View).getTag(R.id.TAG_DB_ROW)!! as Int + 1
+                        val column = (v as View).getTag(R.id.TAG_DB_COL)!! as String
+                        // update the value in the database to match the inputted
+                        // key 0 is for row , key 1 is for column name
+                        DatabaseHelper(this.context!!).editValue(
+                            this.tableNameDB,
+                            row,
+                            column,
+                            v.text.toString()
+                        )
+                        true
+                    }
+                    false
+                }
+            }
+
             row.addView(item)
             item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
             (item.layoutParams as TableRow.LayoutParams).weight = 1f

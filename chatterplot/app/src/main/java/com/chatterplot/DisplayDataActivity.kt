@@ -174,6 +174,7 @@ class DisplayDataActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == INSERT_REQUEST_CODE && resultCode == RESULT_OK) {
             adapter.refreshTable()
+            
         }
         else if(requestCode == RECOGNIZER_REQUEST_CODE) {
             if(resultCode == RESULT_OK || data != null) {

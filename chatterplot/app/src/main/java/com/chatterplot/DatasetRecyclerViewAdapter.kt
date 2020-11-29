@@ -78,8 +78,6 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                     }
             val alert = builder.create()
             alert.show()
-
-
         }
     }
 

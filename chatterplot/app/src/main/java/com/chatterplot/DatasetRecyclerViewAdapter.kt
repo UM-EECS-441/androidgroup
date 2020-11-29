@@ -2,6 +2,7 @@ package com.chatterplot
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.dataset_card.view.*
 
 
 open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
+    private var datasetListCopy = ArrayList(datasetCardList)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
@@ -24,14 +26,20 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
     fun addItem(name: String) {
         val card = DatasetCard(R.drawable.graph_placeholder, name)
-        datasetCardList.add(card)
+        datasetCardList.add(0, card)
+        datasetListCopy.add(0, card)
         this.notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: DatasetViewHolder, position: Int) {
         val currentItem = datasetCardList[position]
+        if(currentItem.preview == null) {
+            holder.imageView.setImageResource(currentItem.imageResource)
+        }
+        else {
+            holder.imageView.setImageDrawable(currentItem.preview)
+        }
 
-        holder.imageView.setImageResource(currentItem.imageResource)
         holder.textView.text = currentItem.name
         val context = holder.itemView.context
 
@@ -59,9 +67,9 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         t.show()
 
                         datasetCardList.remove(currentItem)
+                        datasetListCopy.remove(currentItem)
                         this.notifyDataSetChanged()
-//                        val intent = Intent(context, MainActivity::class.java)
-//                        context.startActivity(intent)
+                        deleteFile(context, currentItem.name)
                     }
                     .setNegativeButton("No") { dialog, id ->
                         // Dismiss the dialog
@@ -69,12 +77,24 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                     }
             val alert = builder.create()
             alert.show()
-
-
         }
     }
 
     override fun getItemCount() = datasetCardList.size
+
+    fun filter(query: String?) {
+        if(query.isNullOrEmpty()) {
+            datasetCardList = ArrayList(datasetListCopy)
+        } else {
+            datasetCardList.clear()
+            for(item in datasetListCopy) {
+                if(item.name.toLowerCase().contains(query.toLowerCase())) {
+                    datasetCardList.add(item)
+                }
+            }
+        }
+        this.notifyDataSetChanged()
+    }
 
     class DatasetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.dataset_graph_preview

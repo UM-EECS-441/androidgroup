@@ -1,6 +1,7 @@
 package com.chatterplot
 
 import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -27,14 +28,15 @@ class DisplayDataActivity : AppCompatActivity() {
     private val INSERT_REQUEST_CODE = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private val EXPORT_LOC_REQUEST_CODE = 30
+    private val CONFIG_REQUEST_CODE = 40
     private lateinit var tableName:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_data)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        tableName = intent.getStringExtra("DATASETNAME")
+        tableName = intent.getStringExtra("DATASETNAME") ?: ""
         //create tableAdapter
         adapter = TableAdapter(this, tableName)
         adapter.loadTable()
@@ -66,14 +68,16 @@ class DisplayDataActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
-                R.id.create_dataset -> {
+                R.id.insert_to_dataset -> {
                     val intent = Intent(this, InsertDataActivity::class.java)
                     intent.putExtra("DATASETNAME", tableName)
                     startActivityForResult(intent, INSERT_REQUEST_CODE)
                     true
                 }
                 R.id.setting_dataset -> {
-                    Toast.makeText(this, "Setting not implemented yet", Toast.LENGTH_LONG).show()
+                    val intent = Intent(this, DatasetConfigActivity::class.java)
+                    intent.putExtra("DATASETNAME", tableName)
+                    startActivityForResult(intent, CONFIG_REQUEST_CODE)
                     true
                 }
                 R.id.export_data_button -> {
@@ -128,15 +132,17 @@ class DisplayDataActivity : AppCompatActivity() {
 
             // write col headers
             var headerVals = adapter.getColumnNames()
-            var header: String = ""
+            var header = ""
             for (i in headerVals.indices) {
 
-                // don't write ID or Timestamp columns
-                if (headerVals[i] != "ID" && headerVals[i] != "Timestamp") {
-                    header += headerVals[i]
-                    if (i != headerVals.size - 1) {
-                        // add comma except for last element
-                        header += ","
+                // don't write ID column or Timestamp unless graphed by time
+                if (headerVals[i] != "ID") {
+                    if (headerVals[i] != "Timestamp" || DatabaseHelper(this).getXAxisColumn(tableName) == "Timestamp") {
+                        header += headerVals[i]
+                        if (i != headerVals.size - 1) {
+                            // add comma except for last element
+                            header += ","
+                        }
                     }
                 }
             }
@@ -149,9 +155,6 @@ class DisplayDataActivity : AppCompatActivity() {
                 writer.write(makeCsvRow(row))
             }
             writer.close()
-        }
-        else {
-            Log.d("herehere", "damn it")
         }
 
         // edit document using documentURI
@@ -172,16 +175,20 @@ class DisplayDataActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == INSERT_REQUEST_CODE && resultCode == RESULT_OK) {
             adapter.refreshTable()
+            
         }
         else if(requestCode == RECOGNIZER_REQUEST_CODE) {
             if(resultCode == RESULT_OK || data != null) {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if(speechProcessor.insertDataset(res[0], tableName)) {
+                if(speechProcessor.textProcessing(res[0], tableName) == 2) {
                     adapter.refreshTable()
                 }
             }
+        }
+        else if (requestCode == CONFIG_REQUEST_CODE && resultCode == RESULT_OK) {
+            adapter.refreshTable() //Why is this not updating the table?
         }
         else if (requestCode == EXPORT_LOC_REQUEST_CODE && resultCode == RESULT_OK
             && data != null) {

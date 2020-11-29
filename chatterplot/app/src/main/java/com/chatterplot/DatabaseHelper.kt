@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Schema(val name: String) {
     val columns = ArrayList<Pair<String, String>>()
@@ -26,9 +28,14 @@ class Schema(val name: String) {
     }
 }
 
+// TimeFormat Codes using SimpleDateFormat:
+// 0 - Unix Epoch Milliseconds (no conversion)
+// 1 - MM/dd/YYYY
+// 2 - MM/dd/YY HH:mm
+
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT)"
+        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT, TimeFormat INTEGER)"
         db!!.execSQL(sqlQuery)
         Log.d("SQL", "Created DATASET table")
     }
@@ -145,7 +152,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return result
     }
 
-    fun getXAxisColumnName(datasetName: String): String {
+    fun getXAxisColumn(datasetName: String): String {
         val db = this.writableDatabase
         val cursor = db.query("DATASET", arrayOf("XAxisColumn"), "TableName='$datasetName'", null, null, null, null, null)
         var result = "Timestamp"
@@ -154,6 +161,46 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
         cursor.close()
         return result
+    }
+
+    fun setXAxisColumn(datasetName: String, newXAxis: String) {
+        val db = this.writableDatabase
+        val cv = ContentValues()
+        cv.put("XAxisColumn", newXAxis)
+        db.update("DATASET", cv, "TableName='$datasetName'",null)
+    }
+
+
+    fun setTimeFormat(datasetName: String, timeCode: Int) {
+        val db = this.writableDatabase
+        val cv = ContentValues()
+        cv.put("TimeFormat", timeCode)
+        db.update("DATASET", cv, "TableName='$datasetName'",null)
+    }
+
+    fun getTimeFormat(datasetName: String): Int {
+        val db = this.writableDatabase
+        val cursor = db.query("DATASET", arrayOf("TimeFormat"), "TableName='$datasetName'", null, null, null, null, null)
+        var result = 0
+        while (cursor.moveToNext()) {
+            result = cursor.getInt(0)
+        }
+        cursor.close()
+        return result
+    }
+
+    fun formatTime(datasetName: String, time: Long): String {
+        val timeCode = getTimeFormat(datasetName)
+        val sdf: android.icu.text.SimpleDateFormat
+        if (timeCode == 1) {
+            sdf = android.icu.text.SimpleDateFormat("MM/dd/YY")
+        } else if (timeCode == 2) {
+            sdf = android.icu.text.SimpleDateFormat("MM/dd/YY HH:mm")
+        } else {
+            return time.toString()
+        }
+        val netDate = Date(time)
+        return sdf.format(netDate)
     }
 
     fun getTable(tableName: String): MutableMap<String, ArrayList<Any>> {
@@ -203,7 +250,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val time = Instant.now().toEpochMilli()
         var datasetXAxis = schema.xAxisColumnName
         // Insert to the table that keeps track of all data sets
-        db.execSQL("INSERT INTO DATASET (TableName, Timestamp, XAxisColumn) VALUES ('${schema.name}', ${time}, '${datasetXAxis}')")
+        db.execSQL("INSERT INTO DATASET (TableName, Timestamp, XAxisColumn, TimeFormat) VALUES ('${schema.name}', ${time}, '${datasetXAxis}', 0)")
         Log.e("SQLInsert", "Inserted "+schema.name+" Into DATASET")
     }
 

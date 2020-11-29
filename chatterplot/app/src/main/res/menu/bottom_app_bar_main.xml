@@ -6,11 +6,7 @@
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="Settings"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/search_dataset"
-        android:icon="@drawable/ic_search_24"
-        android:title="Search dataset"
-        app:showAsAction="ifRoom"/>
+
     <item
         android:id="@+id/create_dataset"
         android:icon="@drawable/ic_add_24"

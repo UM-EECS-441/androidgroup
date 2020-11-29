@@ -1,5 +1,11 @@
 package com.chatterplot
 
+import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import android.widget.Button
+import android.widget.PopupMenu
+import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +18,8 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.bottomappbar.BottomAppBar
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -29,7 +37,11 @@ class GraphActivity : AppCompatActivity() {
 //        preview = AAChartView(this)
 //        preview.layout(0, 0, 1000, 400)
         createPreview(this, tableName)
-        graphDataset()
+        graphDataset("line")
+        val my_button = findViewById<Button>(R.id.chart_menu_button)
+        my_button.setOnClickListener {
+            showPopup(my_button)
+        }
 //
 //        Handler().postDelayed({
 //            val bitmap = convertViewToBitmap(preview as View)
@@ -71,11 +83,20 @@ class GraphActivity : AppCompatActivity() {
 
         }
     }
-    private fun graphDataset() {
+    private fun graphDataset(chartType: String) {
         val data = DatabaseHelper(this).getTable(tableName)
         val graphData = ArrayList<AASeriesElement>()
         val xAxisColumnName = DatabaseHelper(this).getXAxisColumn(tableName)
         val xValArray = data[xAxisColumnName] ?: ArrayList()
+        var chartToDisp = AAChartType.Line
+        when (chartType) {
+            "line" -> chartToDisp = AAChartType.Line
+            "pie" -> chartToDisp = AAChartType.Pie
+            "bar" -> chartToDisp = AAChartType.Bar
+            "column" -> chartToDisp = AAChartType.Column
+        }
+        val my_button = findViewById<Button>(R.id.chart_menu_button)
+        my_button.text = chartType
 
         for((key,value) in data) {
 
@@ -87,7 +108,7 @@ class GraphActivity : AppCompatActivity() {
             }
         }
         val chartModel = AAChartModel()
-            .chartType(AAChartType.Line)
+            .chartType(chartToDisp)
             .title(tableName)
             .subtitle("")
             .backgroundColor("#FFFFFF")
@@ -108,6 +129,32 @@ class GraphActivity : AppCompatActivity() {
 //            .xAxisVisible(false))
     }
 
+    private fun showPopup(view: View) {
+        val popup = PopupMenu(this, view)
+        popup.inflate(R.menu.chart_type_menu)
+
+        popup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item: MenuItem? ->
+
+            when (item!!.itemId) {
+                R.id.header1 -> {
+                    graphDataset("bar")
+                }
+                R.id.header2 -> {
+                    graphDataset("column")
+                }
+                R.id.header3 -> {
+                    graphDataset("line")
+                }
+                R.id.header4 -> {
+                    graphDataset("pie")
+                }
+            }
+
+            true
+        })
+
+        popup.show()
+    }
 //    fun createLineChart() {
 //        val chart = LineChart(this)
 //

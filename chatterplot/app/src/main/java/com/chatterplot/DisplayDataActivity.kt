@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.content.Context
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -8,10 +9,16 @@ import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.util.Log
 import android.view.MenuItem
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.sql.Timestamp
+import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
+import com.github.doyaaaaaken.kotlincsv.client.CsvWriter
 import java.io.BufferedWriter
+import java.io.File
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 
@@ -148,9 +155,6 @@ class DisplayDataActivity : AppCompatActivity() {
                 writer.write(makeCsvRow(row))
             }
             writer.close()
-        }
-        else {
-            Log.d("herehere", "damn it") //lol
         }
 
         // edit document using documentURI

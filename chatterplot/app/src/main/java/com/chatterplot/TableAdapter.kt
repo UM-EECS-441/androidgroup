@@ -87,7 +87,6 @@ class TableAdapter {
                 }
             }
             (tableView as ViewGroup).addView(titleRow)
-
             for (row in 0 until getNumRows()) {
                 var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
                 var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(

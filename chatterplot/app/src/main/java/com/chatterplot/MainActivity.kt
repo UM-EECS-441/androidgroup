@@ -102,6 +102,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         initContinuousRecog()
     }
 
+    override fun onStop() {
+        super.onStop()
+        getcommand = true
+        speechRecognizer.cancel()
+    }
+
     private fun getDatabases() : ArrayList<DatasetCard>{
         val datasetNameList = DatabaseHelper(this).getAllDatabaseNames()
         val cardList = ArrayList<DatasetCard>()
@@ -220,7 +226,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     fun getCommand() {
         getcommand = true
-        speechRecognizer.stopListening()
+        speechRecognizer.cancel()
         startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
     }
 
@@ -268,7 +274,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         }
         Log.i("continuousRecog", "Error: ".plus(message))
         if (getcommand) {
-            speechRecognizer.stopListening()
+            speechRecognizer.cancel()
         } else {
             speechRecognizer.startListening(continuousRecogIntent)
         }
@@ -284,7 +290,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             Log.i("continuousRecog", "Result: ".plus(word))
         }
         if (command) {
-            speechRecognizer.stopListening()
+            speechRecognizer.cancel()
             startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
         } else {
             speechRecognizer.startListening(continuousRecogIntent)

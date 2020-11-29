@@ -66,7 +66,7 @@ class TableAdapter {
 
         val graphedByDate = (xAxisColName == "Timestamp")
         if (!graphedByDate) {
-            var titleRow: TableRow = createTableRow(tableData.keys.size - 2) //exclude ID and timestamp rows
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 2, true) //exclude ID and timestamp rows
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
@@ -112,7 +112,7 @@ class TableAdapter {
             }
         } else {
 
-            var titleRow: TableRow = createTableRow(tableData.keys.size - 1)
+            var titleRow: TableRow = createTableRow(tableData.keys.size - 1, true)
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT)
@@ -145,10 +145,14 @@ class TableAdapter {
                     if (colKey != "ID" && colKey != "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(colNum) as TextView
                         rowNum.text = colData[row].toString()
+                        rowNum.setTag(R.id.TAG_DB_ROW, row)  // 0: row, 1: column name
+                        rowNum.setTag(R.id.TAG_DB_COL, colKey)
                         ++colNum
                     } else if (colKey == "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(0) as TextView
                         rowNum.text = DatabaseHelper(this.context!!).formatTime(tableNameDB, colData[row] as Long)
+                        rowNum.setTag(R.id.TAG_DB_ROW, row)  // 0: row, 1: column name
+                        rowNum.setTag(R.id.TAG_DB_COL, colKey)
                     }
                 }
                 (tableView as ViewGroup).addView(newRow)

@@ -181,7 +181,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return resultDict
     }
 
-    fun createDataset(tableName: String, columns: ArrayList<String>) {
+    fun createDataset(tableName: String, columns: MutableList<String>) {
         val schema = Schema(tableName)
         for (column in columns) {
             schema.addColumn(column, "INT")

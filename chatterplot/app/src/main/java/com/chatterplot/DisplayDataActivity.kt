@@ -180,7 +180,7 @@ class DisplayDataActivity : AppCompatActivity() {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if(speechProcessor.insertDataset(res[0], tableName)) {
+                if(speechProcessor.textProcessing(res[0], tableName) == 2) {
                     adapter.refreshTable()
                 }
             }

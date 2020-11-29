@@ -8,9 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
-import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -20,9 +18,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import android.widget.Button
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomappbar.BottomAppBar
@@ -125,8 +120,8 @@ class MainActivity : AppCompatActivity() {
 //                textView.text = res[0]
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
-                if (speechProcessor.textProcessing(res[0])) {
-                    (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name)
+                if (speechProcessor.textProcessing(res[0], null) == 1) {
+                    (recycler_view.adapter as DatasetRecyclerViewAdapter).addItem(speechProcessor.name!!)
                 }
             }
         }

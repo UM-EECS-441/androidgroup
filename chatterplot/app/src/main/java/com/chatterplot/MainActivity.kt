@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     private lateinit var continuousRecogIntent: Intent
     private lateinit var recycler_view: RecyclerView
     private lateinit var speechRecognizer: SpeechRecognizer
+    private var getcommand = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +59,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
 
         recognizerButton.setOnClickListener { v ->
-            startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
+            getCommand()
         }
 
 //        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
@@ -121,6 +122,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 Toast.makeText(this, "Created dataset $name", Toast.LENGTH_LONG).show()
             }
         }
+        getcommand = false
         speechRecognizer.startListening(continuousRecogIntent)
     }
 
@@ -183,6 +185,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         speechRecognizer.startListening(continuousRecogIntent)
     }
 
+    fun getCommand() {
+        getcommand = true
+        speechRecognizer.stopListening()
+        startActivityForResult(recognizerIntent, RECOGNIZER_REQUEST_CODE)
+    }
+
     override fun onReadyForSpeech(params: Bundle?) {
         Log.i("continuousRecog", "Ready to listen")
     }
@@ -226,7 +234,11 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             else -> "Didn't understand, please try again."
         }
         Log.i("continuousRecog", "Error: ".plus(message))
-        speechRecognizer.startListening(continuousRecogIntent)
+        if (getcommand) {
+            speechRecognizer.stopListening()
+        } else {
+            speechRecognizer.startListening(continuousRecogIntent)
+        }
     }
 
     override fun onResults(results: Bundle?) {

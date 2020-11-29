@@ -53,6 +53,13 @@
             android:backgroundTint="#FFFFFF"
             android:text="Insert" />
 
+<!--        <ImageView-->
+<!--            android:id="@+id/dataset_graph_preview"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="100dp"-->
+<!--            android:layout_alignParentLeft="true"-->
+<!--            android:layout_alignParentTop="true"-->
+<!--            android:src="@drawable/graph_placeholder" />-->
     </RelativeLayout>
 
 

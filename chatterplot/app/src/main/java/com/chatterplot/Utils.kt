@@ -45,7 +45,7 @@ fun createPreview(context: Context, datasetName: String) {
 
     val data = DatabaseHelper(context).getTable(datasetName)
     val graphData = ArrayList<AASeriesElement>()
-    val xAxisColumnName = DatabaseHelper(context).getXAxisColumnName(datasetName)
+    val xAxisColumnName = DatabaseHelper(context).getXAxisColumn(datasetName)
     val xValArray = data[xAxisColumnName] ?: ArrayList()
 
     for((key, value) in data) {

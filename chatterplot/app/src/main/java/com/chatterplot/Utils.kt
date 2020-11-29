@@ -36,6 +36,13 @@ fun saveBitmap(context: Context, img: Bitmap, fileName: String) {
     file.writeBytes(byteArray.toByteArray())
 }
 
+fun deleteFile(context: Context, fileName: String) {
+    val file = File(context.filesDir, fileName)
+    if(file.isFile) {
+        file.delete()
+    }
+}
+
 fun createPreview(context: Context, datasetName: String) {
     val preview = AAChartView(context)
     preview.callBack = GraphCallback(context, datasetName, preview)

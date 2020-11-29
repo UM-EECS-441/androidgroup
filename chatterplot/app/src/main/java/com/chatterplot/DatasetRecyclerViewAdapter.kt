@@ -69,8 +69,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         datasetCardList.remove(currentItem)
                         datasetListCopy.remove(currentItem)
                         this.notifyDataSetChanged()
-//                        val intent = Intent(context, MainActivity::class.java)
-//                        context.startActivity(intent)
+                        deleteFile(context, currentItem.name)
                     }
                     .setNegativeButton("No") { dialog, id ->
                         // Dismiss the dialog

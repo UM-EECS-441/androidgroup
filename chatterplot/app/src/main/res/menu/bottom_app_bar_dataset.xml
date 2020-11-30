@@ -10,12 +10,12 @@
         android:id="@+id/graph_dataset"
         android:icon="@drawable/graph_placeholder"
         android:title="Switch to Graph"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/insert_to_dataset"
         android:icon="@drawable/ic_add_24"
         android:title="Add data"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
     <item
         android:id="@+id/export_data_button"
         android:icon="@drawable/ic_baseline_share_24"

@@ -28,6 +28,7 @@ class GraphActivity : AppCompatActivity() {
         setContentView(R.layout.activity_graph)
         tableName = intent.getStringExtra("DATASETNAME")
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
+        supportActionBar?.title = tableName
 //        preview = AAChartView(this)
 //        preview.layout(0, 0, 1000, 400)
         createPreview(this, tableName)

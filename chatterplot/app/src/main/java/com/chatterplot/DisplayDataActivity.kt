@@ -37,6 +37,7 @@ class DisplayDataActivity : AppCompatActivity() {
 //        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         tableName = intent.getStringExtra("DATASETNAME") ?: ""
+        supportActionBar?.title = tableName
         //create tableAdapter
         adapter = TableAdapter(this, tableName)
         adapter.loadTable()

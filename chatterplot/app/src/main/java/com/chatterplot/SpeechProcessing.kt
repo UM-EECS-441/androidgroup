@@ -52,6 +52,11 @@ class SpeechProcessor(ctext: Context) {
                 }
 //                numbers.add(words[idx].toIntOrNull() ?: return false)
             }
+            var columns = DatabaseHelper(context).getColumnNames(name!!)
+            if (data.size != columns.size) {
+                Toast.makeText(context, "Invalid data entry", Toast.LENGTH_SHORT).show()
+                return false
+            }
             DatabaseHelper(context).insertRow(name!!, data)
             return true
         }

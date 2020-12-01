@@ -53,7 +53,9 @@ class SpeechProcessor(ctext: Context) {
 //                numbers.add(words[idx].toIntOrNull() ?: return false)
             }
             var columns = DatabaseHelper(context).getColumnNames(name!!)
-            if (data.size != columns.size) {
+            if (data.size != columns.size - 2) {
+                Log.i("SpeechRecognizer", "invalid data columns input: ${data.size}, table: ${columns.size - 2}")
+                Log.i("dataset", columns.joinToString(" "))
                 Toast.makeText(context, "Invalid data entry", Toast.LENGTH_SHORT).show()
                 return false
             }

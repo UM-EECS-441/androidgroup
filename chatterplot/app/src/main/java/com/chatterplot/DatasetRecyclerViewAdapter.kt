@@ -2,6 +2,7 @@ package com.chatterplot
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.dataset_card.view.*
 
 
 open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<DatasetCard>) : RecyclerView.Adapter<DatasetRecyclerViewAdapter.DatasetViewHolder>() {
+    private var datasetListCopy = ArrayList(datasetCardList)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DatasetViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.dataset_card,
@@ -60,8 +62,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
                         datasetCardList.remove(currentItem)
                         this.notifyDataSetChanged()
-//                        val intent = Intent(context, MainActivity::class.java)
-//                        context.startActivity(intent)
+                        deleteFile(context, currentItem.name)
                     }
                     .setNegativeButton("No") { dialog, id ->
                         // Dismiss the dialog
@@ -69,8 +70,6 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                     }
             val alert = builder.create()
             alert.show()
-
-
         }
     }
 

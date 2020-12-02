@@ -6,19 +6,22 @@
     android:orientation="horizontal"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.textfield.TextInputLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_margin="16dp"
-        android:layout_marginEnd="24dp"
-        android:theme="@style/AppThemeMaterial"
         android:id="@+id/column_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="8dp"
         android:layout_toStartOf="@id/delete_button"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        android:theme="@style/AppThemeMaterial"
+        app:layout_constraintStart_toStartOf="parent">
+
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"/>
     </com.google.android.material.textfield.TextInputLayout>
     <ImageButton
         android:layout_width="wrap_content"

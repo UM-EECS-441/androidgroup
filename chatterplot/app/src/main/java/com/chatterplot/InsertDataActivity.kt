@@ -36,7 +36,7 @@ class InsertDataActivity : AppCompatActivity() {
 
         val parent = findViewById<ConstraintLayout>(R.id.insert_data)
         val setter = ConstraintSet()
-        for(idx in 1 until columnNames.size-1) {
+        for(idx in 2 until columnNames.size) {
             val name = columnNames[idx]
             val inflater = LayoutInflater.from(this)
             val input = inflater.inflate(R.layout.column_insert_field, null, false)
@@ -68,6 +68,7 @@ class InsertDataActivity : AppCompatActivity() {
         DatabaseHelper(this).insertRow(datasetName, insertValues)
         val t = Toast.makeText(this, "Data point added!", Toast.LENGTH_LONG)
         t.show()
+        createPreview(this, datasetName)
         val resultIntent= Intent()
         setResult(Activity.RESULT_OK, resultIntent)
         finish()

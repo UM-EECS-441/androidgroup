@@ -26,14 +26,20 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
     fun addItem(name: String) {
         val card = DatasetCard(R.drawable.graph_placeholder, name)
-        datasetCardList.add(card)
+        datasetCardList.add(0, card)
+        datasetListCopy.add(0, card)
         this.notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: DatasetViewHolder, position: Int) {
         val currentItem = datasetCardList[position]
+        if(currentItem.preview == null) {
+            holder.imageView.setImageResource(currentItem.imageResource)
+        }
+        else {
+            holder.imageView.setImageDrawable(currentItem.preview)
+        }
 
-        holder.imageView.setImageResource(currentItem.imageResource)
         holder.textView.text = currentItem.name
         val context = holder.itemView.context
 
@@ -61,6 +67,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
                         t.show()
 
                         datasetCardList.remove(currentItem)
+                        datasetListCopy.remove(currentItem)
                         this.notifyDataSetChanged()
                         deleteFile(context, currentItem.name)
                     }
@@ -74,6 +81,20 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
     }
 
     override fun getItemCount() = datasetCardList.size
+
+    fun filter(query: String?) {
+        if(query.isNullOrEmpty()) {
+            datasetCardList = ArrayList(datasetListCopy)
+        } else {
+            datasetCardList.clear()
+            for(item in datasetListCopy) {
+                if(item.name.toLowerCase().contains(query.toLowerCase())) {
+                    datasetCardList.add(item)
+                }
+            }
+        }
+        this.notifyDataSetChanged()
+    }
 
     class DatasetViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.dataset_graph_preview

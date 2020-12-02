@@ -34,7 +34,7 @@
         style="@style/Widget.MaterialComponents.BottomAppBar"
         android:theme="@style/AppThemeMaterial"
         app:fabAlignmentMode="center"
-        app:menu="@menu/bottom_app_bar_graph"
+        app:menu="@menu/bottom_app_bar_main"
         app:layout_anchorGravity="bottom"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"

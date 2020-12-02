@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -53,32 +52,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.update("DATASET", sqlval, "TableName='${tableName}'", null)
     }
 
-    fun changeDatabaseName(oldName: String, newName: String) {
-        val db = this.writableDatabase
-        val args = ContentValues()
-        args.put("TableName", newName)
-        val query = "ALTER TABLE [$oldName] RENAME TO [$newName]"
-
-        db.beginTransaction()
-        db.update("DATASET", args, "TableName=[$oldName]", null)
-        db.execSQL(query)
-        db.setTransactionSuccessful()
-        db.endTransaction()
-    }
-
-//    TODO: Current sqlite version does not support renaming column
-//    fun changeDatabaseColumn(tableName: String, newColumn: ArrayList<String>) {
-//        val db = this.writableDatabase
-//        val old = getColumnNames(tableName).joinToString(prefix="(", postfix=")") {
-//            "[$it]"
-//        }
-//        val new = newColumn.joinToString(prefix="(", postfix=")") {
-//            "[$it]"
-//        }
-//        val query = "ALTER TABLE [$tableName] RENAME COLUMN $old TO $new"
-//        db.execSQL(query)
-//    }
-
     fun getColumnNames(tableName: String): Array<String> {
         val db = this.readableDatabase
         val cursor = db.query("[$tableName]", null, null, null, null, null, null)
@@ -98,7 +71,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
 //        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
         val time = Instant.now().toEpochMilli()
-//        Log.e("Time", time.toString())
+        Log.e("Time", time.toString())
         sqlval.put("Timestamp", time)
 
         for(i in 0 until values.size) {
@@ -108,7 +81,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
         val db = this.writableDatabase
         db.insertOrThrow("[$tableName]", null, sqlval)
-//        Log.e("sql", getTable(tableName).toString())
+        Log.e("sql", getTable(tableName).toString())
         updateTimestamp(tableName)
     }
 
@@ -152,7 +125,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getAllDatabaseNames(): ArrayList<String> {
         val db = this.writableDatabase
-        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, "Timestamp DESC")
+        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, null)
         val result = arrayListOf<String>()
         while(cursor.moveToNext()) {
             result.add(cursor.getString(0))
@@ -267,9 +240,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         db.execSQL("DELETE FROM DATASET WHERE TableName='$tableName'")
         db.execSQL("DROP TABLE '$tableName'")
-
-        // Delete the preview file
-        File(context.filesDir, tableName).delete()
     }
 
     fun getAllDatabase(): ArrayList<String> {

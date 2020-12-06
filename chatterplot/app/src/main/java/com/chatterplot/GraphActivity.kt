@@ -71,6 +71,12 @@ class GraphActivity : AppCompatActivity() {
                     startActivity(Intent.createChooser(intent, null))
                     true
                 }
+                R.id.table_dataset -> {
+                    val intent = Intent(this, DisplayDataActivity::class.java)
+                    intent.putExtra("DATASETNAME", tableName)
+                    startActivity(intent)
+                    true
+                }
                 else -> {
                     true
                 }

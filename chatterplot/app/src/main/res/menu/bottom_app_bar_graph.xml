@@ -6,6 +6,10 @@
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="Settings"
         app:showAsAction="ifRoom"/>
+    <item android:id="@+id/table_dataset"
+        android:icon="@drawable/ic_baseline_table_chart_24"
+        android:title="Table"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/share_dataset"
         android:icon="@drawable/ic_baseline_share_24"

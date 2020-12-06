@@ -31,7 +31,6 @@ class TableAdapter {
         tableView = (this.context as DisplayDataActivity).findViewById(R.id.dataDisplayTable)
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
         xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
-
 //        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
 //
 //        val pullDataQuery: String = ""  //TODO write the actual query dependent on schema
@@ -157,6 +156,12 @@ class TableAdapter {
                 (tableView as ViewGroup).addView(newRow)
             }
         }
+        val placeholder: TableRow = createTableRow(tableData.keys.size - 2)
+        val rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
+        TableRow.LayoutParams.MATCH_PARENT,
+        TableRow.LayoutParams.WRAP_CONTENT)
+        placeholder.layoutParams = rowLayoutParams
+        (tableView as ViewGroup).addView(placeholder)
     }
 
 

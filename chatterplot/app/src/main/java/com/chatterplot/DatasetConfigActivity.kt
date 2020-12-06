@@ -39,7 +39,7 @@ class DatasetConfigActivity : AppCompatActivity() {
         xAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, columnNames)
         xSpinner.adapter = xAdapter
 
-        val timeFormats = arrayListOf("Milliseconds", "Date", "Date & Time")
+        val timeFormats = arrayListOf("Date & Time", "Date & Year", "Unix Time")
         timeSpinner = findViewById(R.id.timeFormatConfigSpinner)
         timeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, timeFormats)
         timeSpinner.adapter = timeAdapter

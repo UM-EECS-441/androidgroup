@@ -29,9 +29,9 @@ class Schema(val name: String) {
 }
 
 // TimeFormat Codes using SimpleDateFormat:
-// 0 - Unix Epoch Milliseconds (no conversion)
+// 0 - MM/dd/YY HH:mm
 // 1 - MM/dd/YYYY
-// 2 - MM/dd/YY HH:mm
+// 2 - Unix Epoch Milliseconds (no conversion)
 
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
@@ -201,10 +201,10 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun formatTime(datasetName: String, time: Long): String {
         val timeCode = getTimeFormat(datasetName)
         val sdf: android.icu.text.SimpleDateFormat
-        if (timeCode == 1) {
+        if (timeCode == 0) {
+            sdf = android.icu.text.SimpleDateFormat("MM/dd HH:mm")
+        } else if (timeCode == 1) {
             sdf = android.icu.text.SimpleDateFormat("MM/dd/YY")
-        } else if (timeCode == 2) {
-            sdf = android.icu.text.SimpleDateFormat("MM/dd/YY HH:mm")
         } else {
             return time.toString()
         }

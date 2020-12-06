@@ -104,9 +104,9 @@ class GraphActivity : AppCompatActivity() {
 
             if(key != "ID" && key != "Timestamp" && key != xAxisColumnName) {
                 val currentData = Array(value.size) {
-                    arrayOf((xValArray[it] as String).toFloat(), (value[it] as String).toInt())
+                    arrayOf(xValArray[it].toString().toLong(), (value[it] as String).toInt())
                 }
-                val sorted = currentData.sortedWith(compareBy {it[0]})
+                val sorted = currentData.sortedWith(compareBy {it[0].toString().toLong()})
                 val current = AASeriesElement().name(key).data(sorted.toTypedArray())
                 graphData.add(current)
                 val temp = Array<Any>(value.size) {
@@ -122,7 +122,7 @@ class GraphActivity : AppCompatActivity() {
             .backgroundColor("#FFFFFF")
             .dataLabelsEnabled(true)
             .series(graphData.toTypedArray())
-            .xAxisLabelsEnabled(true)
+            .xAxisLabelsEnabled(false)
 //            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
 

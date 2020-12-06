@@ -112,7 +112,6 @@ class GraphActivity : AppCompatActivity() {
                 val temp = Array<Any>(value.size) {
                     arrayOf(xValArray[it], (value[it] as String).toInt())
                 }
-                Log.e("Data", (temp[0] as Array<Any>)[0].toString())
             }
         }
 

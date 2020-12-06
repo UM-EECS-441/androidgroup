@@ -14,6 +14,7 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AAChartModel
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
 import com.google.android.material.bottomappbar.BottomAppBar
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -102,12 +103,19 @@ class GraphActivity : AppCompatActivity() {
         for((key,value) in data) {
 
             if(key != "ID" && key != "Timestamp" && key != xAxisColumnName) {
-                val current = AASeriesElement().name(key).data(Array<Any>(value.size){it->
-                    arrayOf(xValArray[it],(value[it] as String).toInt())
-                })
+                val currentData = Array(value.size) {
+                    arrayOf((xValArray[it] as String).toFloat(), (value[it] as String).toInt())
+                }
+                val sorted = currentData.sortedWith(compareBy {it[0]})
+                val current = AASeriesElement().name(key).data(sorted.toTypedArray())
                 graphData.add(current)
+                val temp = Array<Any>(value.size) {
+                    arrayOf(xValArray[it], (value[it] as String).toInt())
+                }
+                Log.e("Data", (temp[0] as Array<Any>)[0].toString())
             }
         }
+
         val chartModel = AAChartModel()
             .chartType(chartToDisp)
             .title(tableName)
@@ -115,7 +123,7 @@ class GraphActivity : AppCompatActivity() {
             .backgroundColor("#FFFFFF")
             .dataLabelsEnabled(true)
             .series(graphData.toTypedArray())
-            .xAxisLabelsEnabled(false)
+            .xAxisLabelsEnabled(true)
 //            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
 

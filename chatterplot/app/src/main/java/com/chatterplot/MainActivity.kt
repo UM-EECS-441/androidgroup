@@ -220,27 +220,27 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     }
 
     override fun onRmsChanged(rmsdB: Float) {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onBufferReceived(buffer: ByteArray?) {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onEvent(eventType: Int, params: Bundle?) {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onBeginningOfSpeech() {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onEndOfSpeech() {
-//        Log.i("continuousRecog", "Ready to listen")
+        /* no-op */
     }
 
     override fun onError(error: Int) {

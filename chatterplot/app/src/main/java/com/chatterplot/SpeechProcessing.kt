@@ -39,12 +39,12 @@ class SpeechProcessor(ctext: Context) {
                 }
                 Log.i("SpeechRecognizer", "dataset name: ".plus(name))
             }
-            val data = ArrayList<String>()
+            var data = ArrayList<String>()
             for(word in words) {
                 if (word == "into") break
                 if (word != "and" && word != "+") {
                     if(word.toIntOrNull() == null) {
-                        return false
+                        continue
                     }
                     else {
                         data.add(word)
@@ -59,10 +59,30 @@ class SpeechProcessor(ctext: Context) {
                 Toast.makeText(context, "Invalid data entry", Toast.LENGTH_SHORT).show()
                 return false
             }
+            data = insertWithColumnName(text, columns, data)
             DatabaseHelper(context).insertRow(name!!, data)
             return true
         }
         return false
+    }
+
+    private fun insertWithColumnName(text: String, columnNames: Array<String>,
+                                     data: ArrayList<String>): ArrayList<String> {
+        val indicies = ArrayList<Int>()
+        for (word in text.split(" ")) {
+            val idx = columnNames.indexOf(word)
+            if (idx != -1) {
+                indicies.add(idx)
+            }
+        }
+        if (indicies.size != columnNames.size - 2) return data
+
+        val newdata = ArrayList<String>(data)
+        Log.i("insert", newdata.joinToString(" "))
+        for ((idx, v) in data.withIndex()) {
+            newdata[indicies[idx] - 2] = v
+        }
+        return newdata
     }
 
     private fun createDataset(text: String): Boolean {

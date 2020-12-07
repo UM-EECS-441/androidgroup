@@ -1,5 +1,6 @@
 package com.chatterplot
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Typeface
 import android.icu.text.SimpleDateFormat
@@ -30,6 +31,7 @@ class TableAdapter {
         this.tableNameDB = tableNameDB
         tableView = (this.context as DisplayDataActivity).findViewById(R.id.dataDisplayTable)
         tableData = DatabaseHelper(this.context!!).getTable(tableNameDB)
+        Log.d("welp", tableData.keys.toString())
         xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
 //        var db: SQLiteDatabase = SQLiteDatabase.openDatabase(pathDB, null, 0)
 //
@@ -65,6 +67,7 @@ class TableAdapter {
 
         val graphedByDate = (xAxisColName == "Timestamp")
         if (!graphedByDate) {
+            Log.d("welp", "not by date")
             var titleRow: TableRow = createTableRow(tableData.keys.size - 2, true) //exclude ID and timestamp rows
             var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
@@ -87,6 +90,8 @@ class TableAdapter {
             }
             (tableView as ViewGroup).addView(titleRow)
             for (row in 0 until getNumRows()) {
+                Log.d("welp num rows", getNumRows().toString())
+                Log.d("welp this row", row.toString())
                 var newRow: TableRow = createTableRow(tableData.keys.size - 2)  // exclude timestamp and ID
                 var rowLayoutParams: TableRow.LayoutParams = TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT,
@@ -104,6 +109,8 @@ class TableAdapter {
                             ++colNum
                         }
                         rowText.text = colData[row].toString()
+                        rowText.setTag(R.id.TAG_DB_ROW, row)  // 0: row, 1: column name
+                        rowText.setTag(R.id.TAG_DB_COL, colKey)
                     }
                 }
                 (tableView as ViewGroup).addView(newRow)
@@ -140,7 +147,6 @@ class TableAdapter {
 
                 var colNum = 1
                 for ((colKey, colData) in tableData) {
-                    Log.d("wtf is going on", "$colKey $colData")
                     if (colKey != "ID" && colKey != "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(colNum) as TextView
                         rowNum.text = colData[row].toString()
@@ -167,6 +173,7 @@ class TableAdapter {
 
 
     private fun createTableRow(numColumns: Int, firstRow: Boolean =false): TableRow {
+        Log.d("welp num cols createrow", numColumns.toString())
         var row = TableRow(context)
         row.setPadding(5)
         for (i in 1..numColumns) {
@@ -190,11 +197,18 @@ class TableAdapter {
                         val column = (v as View).getTag(R.id.TAG_DB_COL)!! as String
                         // update the value in the database to match the inputted
                         // key 0 is for row , key 1 is for column name
-                        DatabaseHelper(this.context!!).editValue(
+                        Log.d("welp row", row.toString())
+                        Log.d("welp col", column.toString())
+                        var cv: ContentValues = ContentValues()
+                        cv.put(column, v.text.toString())
+                        DatabaseHelper(this.context!!).updateRow(
                             this.tableNameDB,
-                            row,
-                            column,
-                            v.text.toString()
+                            cv,
+                            "ID=$row",
+                            null
+//                            row,
+//                            column,
+//                            v.text.toString()
                         )
                         true
                     }
@@ -226,6 +240,7 @@ class TableAdapter {
 
 
     fun getNumRows(): Int {
+        Log.d("welp ID col", tableData["ID"].toString())
         return tableData["ID"]!!.size
     }
 

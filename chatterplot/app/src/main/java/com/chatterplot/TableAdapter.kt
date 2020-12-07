@@ -140,6 +140,7 @@ class TableAdapter {
 
                 var colNum = 1
                 for ((colKey, colData) in tableData) {
+                    Log.d("wtf is going on", "$colKey $colData")
                     if (colKey != "ID" && colKey != "Timestamp") {
                         var rowNum: TextView = newRow.getChildAt(colNum) as TextView
                         rowNum.text = colData[row].toString()
@@ -170,8 +171,11 @@ class TableAdapter {
         row.setPadding(5)
         for (i in 1..numColumns) {
             var item = TextView(context)
+            item.setPadding(50, 10, 100, 10)
+            item.textSize = 25F
             item.isFocusable = true
             if (!firstRow) {
+                item.textSize = 20F
                 item.setOnClickListener { v ->
                     var currTextView: TextView = v as TextView
                     currTextView.isCursorVisible = true
@@ -199,7 +203,7 @@ class TableAdapter {
             }
 
             row.addView(item)
-            item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
+//            item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20F)
             (item.layoutParams as TableRow.LayoutParams).weight = 1f
             (item.layoutParams as TableRow.LayoutParams).height = TableRow.LayoutParams.WRAP_CONTENT
             (item.layoutParams as TableRow.LayoutParams).width = TableRow.LayoutParams.WRAP_CONTENT

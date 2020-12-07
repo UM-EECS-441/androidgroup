@@ -73,6 +73,19 @@ class CreateDatasetActivity : AppCompatActivity() {
         createButton.setOnClickListener { _ ->
             createDataset()
         }
+
+//        if (ContextCompat.checkSelfPermission(
+//                this@CreateDatasetActivity,
+//                Manifest.permission.READ_EXTERNAL_STORAGE
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            ActivityCompat.requestPermissions(
+//                this@CreateDatasetActivity,
+//                arrayOf(
+//                    Manifest.permission.READ_EXTERNAL_STORAGE
+//                ), READ_PERMISSION
+//            )
+//        }
     }
 
     private fun addView(inputField: View) {

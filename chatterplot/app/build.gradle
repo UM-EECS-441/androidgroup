@@ -43,4 +43,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.github.AAChartModel:AAChartCore-Kotlin:-SNAPSHOT'
     implementation 'com.github.doyaaaaaken:kotlin-csv-jvm:0.13.0'
+    implementation 'com.github.AppIntro:AppIntro:6.0.0'
 }

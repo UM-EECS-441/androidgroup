@@ -16,6 +16,7 @@ class DatasetConfigActivity : AppCompatActivity() {
 
     private lateinit var tableName:String
     lateinit var xSpinner: Spinner
+    
     lateinit var xAdapter: ArrayAdapter<String>
     lateinit var timeSpinner: Spinner
     lateinit var timeAdapter: ArrayAdapter<String>

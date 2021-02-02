@@ -8,6 +8,6 @@
     <string name="hello_world">Hello Square World!</string>
 
 
-    <item type="id" name="TAG_DB_ROW"/>
-    <item type="id" name="TAG_DB_COL"/>
+    <item name="TAG_DB_ROW" type="id" />
+    <item name="TAG_DB_COL" type="id" />
 </resources>

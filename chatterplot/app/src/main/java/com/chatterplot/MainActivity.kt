@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        showTutorial(null)
+
         val datasetList = getDatabases()
 
         recycler_view  = findViewById(R.id.recycler_view)
@@ -193,6 +195,11 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     fun showAllDatabase(v:View?) {
         val intent = Intent(this, DatabaseActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun showTutorial(v:View?) {
+        val intent = Intent(this, TutorialActivity::class.java)
         startActivity(intent)
     }
 

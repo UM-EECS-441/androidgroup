@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -33,10 +34,11 @@ class InsertDataActivity : AppCompatActivity() {
         titleText.text = preString + datasetName
 
         val columnNames = DatabaseHelper(this).getColumnNames(datasetName)
+        Log.e("columns", columnNames.toString())
 
         val parent = findViewById<ConstraintLayout>(R.id.insert_data)
         val setter = ConstraintSet()
-        for(idx in 2 until columnNames.size) {
+        for(idx in 0 until columnNames.size) {
             val name = columnNames[idx]
             val inflater = LayoutInflater.from(this)
             val input = inflater.inflate(R.layout.column_insert_field, null, false)
@@ -58,14 +60,17 @@ class InsertDataActivity : AppCompatActivity() {
         confirmButton = findViewById(R.id.confirmInsertButton)
 
         confirmButton.setOnClickListener {
-            insertFunction(ArrayList(columns.map{
-                it.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
-            }))
+            val inputPairs = ArrayList<Pair<String, String>>()
+            columns.forEach{
+                var pair = Pair<String, String>(it.findViewById<TextInputLayout>(R.id.column_input).hint.toString(), it.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString())
+                if (pair.second != "") inputPairs.add(pair)
+            }
+            insertFunction(inputPairs)
         }
     }
 
-    private fun insertFunction(insertValues : ArrayList<String>) {
-        DatabaseHelper(this).insertRow(datasetName, insertValues)
+    private fun insertFunction(insertValues : ArrayList<Pair<String, String>>) {
+        DatabaseHelper(this).insertData(datasetName, insertValues)
         val t = Toast.makeText(this, "Data point added!", Toast.LENGTH_LONG)
         t.show()
         createPreview(this, datasetName)

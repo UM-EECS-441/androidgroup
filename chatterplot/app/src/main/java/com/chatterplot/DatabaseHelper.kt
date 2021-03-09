@@ -35,13 +35,18 @@ class Schema(val name: String) {
 
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-        val sqlQuery = "CREATE TABLE DATASET (TableName TEXT NOT NULL PRIMARY KEY, Timestamp INTEGER, XAxisColumn TEXT, TimeFormat INTEGER)"
-        db!!.execSQL(sqlQuery)
-        Log.d("SQL", "Created DATASET table")
+
+        val masterInit = "CREATE TABLE MASTER (TableName TEXT, ColumnName TEXT, Data INTEGER, Timestamp INTEGER)"
+        db!!.execSQL(masterInit)
+        val directoryInit = "CREATE TABLE DIRECTORY (TableName TEXT, isCategorical INTEGER, XAxis TEXT, TimeFormat INTEGER)"
+        db!!.execSQL(directoryInit)
+
+        Log.d("SQL", "Created MASTER and DIRECTORY table")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db!!.execSQL("DROP TABLE IF EXISTS DATASET")
+        db!!.execSQL("DROP TABLE IF EXISTS MASTER")
+        db!!.execSQL("DROP TABLE IF EXISTS DIRECTORY")
         onCreate(db)
     }
 
@@ -66,50 +71,47 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.endTransaction()
     }
 
-//    TODO: Current sqlite version does not support renaming column
-//    fun changeDatabaseColumn(tableName: String, newColumn: ArrayList<String>) {
-//        val db = this.writableDatabase
-//        val old = getColumnNames(tableName).joinToString(prefix="(", postfix=")") {
-//            "[$it]"
-//        }
-//        val new = newColumn.joinToString(prefix="(", postfix=")") {
-//            "[$it]"
-//        }
-//        val query = "ALTER TABLE [$tableName] RENAME COLUMN $old TO $new"
-//        db.execSQL(query)
-//    }
+    private fun <T> Cursor.toArrayList(block: (Cursor) -> T) : ArrayList<T> {
+        return arrayListOf<T>().also { list ->
+            if (moveToFirst()) {
+                do {
+                    list.add(block.invoke(this))
+                } while (moveToNext())
+            }
+        }
+    }
 
-    fun getColumnNames(tableName: String): Array<String> {
+    fun getColumnNames(tableName: String): ArrayList<String> {
         val db = this.readableDatabase
-        val cursor = db.query("[$tableName]", null, null, null, null, null, null)
-        val colNames = cursor.columnNames
+        val cursor = db.rawQuery("SELECT ColName FROM $tableName", null)
+        val colNames = cursor.toArrayList{ cursor.getString(0) }
         cursor.close()
         return colNames
     }
 
-    fun insertRow(tableName:String, values:ArrayList<String>, byColumn: Boolean=false) {
-        //TODO: implement by column insertion
-        val sqlval = ContentValues()
-        val colNames = getColumnNames(tableName)
-
-        // ID and Timestamp does not need to be provided
-        if(colNames.size - 2 != values.size) {
-            throw Exception("Number of input does not match number of columns")
-        }
-//        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
+    // insertData: adds data input to database
+    //
+    // IN: datasetname - String - The name of the target dataset
+    //     dataList - ArrayList of <String,String> Pairs - (Column, Data) for each input
+    //
+    // OUT: logs successful insertions in debug
+    fun insertData(datasetName: String, dataList: ArrayList<Pair<String, String>>) {
         val time = Instant.now().toEpochMilli()
-//        Log.e("Time", time.toString())
-        sqlval.put("Timestamp", time)
-
-        for(i in 0 until values.size) {
-            sqlval.put("[${colNames[i+2]}]", values[i])
-        }
-//        sqlval.put("Timestamp", System.currentTimeMillis()/1000.0)
-
+        val sqlRow = ContentValues()
         val db = this.writableDatabase
-        db.insertOrThrow("[$tableName]", null, sqlval)
-//        Log.e("sql", getTable(tableName).toString())
-        updateTimestamp(tableName)
+        dataList.forEach {
+            sqlRow.put("TableName", datasetName)
+            sqlRow.put("ColumnName", it.first)
+            sqlRow.put("Data", it.second)
+            sqlRow.put("Timestamp", time)
+            db.insertOrThrow("MASTER", null, sqlRow)
+        }
+        Log.d("SQLInsert", "Added ${dataList.size} data points to MASTER")
+    }
+
+    //Just to this compiles until I fix speech processing
+    fun insertRow(string: String, al: ArrayList<String>) {
+        Log.d("Uhh", "This is gone")
     }
 
     fun insertRows(tableName: String, values: ArrayList<ArrayList<String>>) {
@@ -154,7 +156,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getAllDatabaseNames(): ArrayList<String> {
         val db = this.writableDatabase
-        val cursor = db.query("DATASET", arrayOf("TableName"), null, null, null, null, "Timestamp DESC")
+        val cursor = db.query("DIRECTORY", arrayOf("TableName"), null, null, null, null, null)
         val result = arrayListOf<String>()
         while(cursor.moveToNext()) {
             result.add(cursor.getString(0))
@@ -165,7 +167,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getXAxisColumn(datasetName: String): String {
         val db = this.writableDatabase
-        val cursor = db.query("DATASET", arrayOf("XAxisColumn"), "TableName='$datasetName'", null, null, null, null, null)
+        val cursor = db.query("DIRECTORY", arrayOf("xAxis"), "TableName='$datasetName'", null, null, null, null, null)
         var result = "Timestamp"
         while (cursor.moveToNext()) {
             result = cursor.getString(0)
@@ -177,8 +179,8 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun setXAxisColumn(datasetName: String, newXAxis: String) {
         val db = this.writableDatabase
         val cv = ContentValues()
-        cv.put("XAxisColumn", newXAxis)
-        db.update("DATASET", cv, "TableName='$datasetName'",null)
+        cv.put("xAxis", newXAxis)
+        db.update("DIRECTORY", cv, "TableName='$datasetName'",null)
     }
 
 
@@ -239,35 +241,33 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return resultDict
     }
 
-    fun createDataset(tableName: String, columns: MutableList<String>) {
-        val schema = Schema(tableName)
-        for (column in columns) {
-            schema.addColumn(column, "INT")
-        }
-        this.createTable(schema)
-    }
-
-    fun createTable(schema: Schema) {
+    // createNewDataset: creates a new dataset in the database
+    //
+    // IN: tableName - String - The name of the new dataset
+    //     columns - List of Strings - list of names of desired columns/categories
+    //     categorical - Boolean - True if dataset contains categorical/tally data,
+    //                             False for Time series or x,y plots
+    //
+    // OUT: logs successful creations in debug
+    fun createNewDataset(tableName: String, columns: ArrayList<String>, categorical: Int) {
         val db = this.writableDatabase
-        var sqlQuery = "CREATE TABLE [${schema.name}] (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" + ","
-        sqlQuery += "Timestamp INTEGER"
-        for (idx in 0 until schema.columns.size) {
-            sqlQuery += ", [${schema.columns[idx].first}] ${schema.columns[idx].second}"
-        }
-        sqlQuery += ")"
+        var sqlQuery = "CREATE TABLE $tableName (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ColName TEXT NOT NULL)"
         db.execSQL(sqlQuery)
+        var colQuery = "INSERT INTO $tableName (ColName) VALUES "
+        for (col in columns) {
+            colQuery += "(\"$col\"),"
+        }
+        colQuery = colQuery.dropLast(1)
+        db.execSQL(colQuery)
 
-
-        val time = Instant.now().toEpochMilli()
-        var datasetXAxis = schema.xAxisColumnName
-        // Insert to the table that keeps track of all data sets
-        db.execSQL("INSERT INTO DATASET (TableName, Timestamp, XAxisColumn, TimeFormat) VALUES ('${schema.name}', ${time}, '${datasetXAxis}', 0)")
-        Log.e("SQLInsert", "Inserted "+schema.name+" Into DATASET")
+        db.execSQL("INSERT INTO DIRECTORY (TableName, isCategorical, xAxis, TimeFormat) VALUES ('$tableName', $categorical, 'Timestamp', 0)")
+        Log.d("SQL", "Created new dataset $tableName")
     }
 
     fun deleteTable(tableName: String) {
         val db = this.writableDatabase
-        db.execSQL("DELETE FROM DATASET WHERE TableName='$tableName'")
+        db.execSQL("DELETE FROM MASTER WHERE TableName='$tableName'")
+        db.execSQL("DELETE FROM DIRECTORY WHERE TableName='$tableName'")
         db.execSQL("DROP TABLE '$tableName'")
 
         // Delete the preview file
@@ -295,6 +295,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         private const val DATABASE_NAME = "Chatterplot.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
     }
 }

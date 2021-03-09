@@ -209,21 +209,33 @@ class CreateDatasetActivity : AppCompatActivity() {
             Toast.makeText(this, "Name of the dataset must be specified", Toast.LENGTH_LONG).show()
             return
         }
-        val schema = Schema(name)
+//        val schema = Schema(name)
+//        for(column in columns) {
+//            val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
+//            if(colName == "") {
+//                Toast.makeText(this, "Names of columns must be specified", Toast.LENGTH_LONG).show()
+//                return
+//            }
+//            schema.addColumn(colName, "INT")
+//        }
+
+
+//        schema.setXAxisColumn(spin.selectedItem.toString())
+        Log.v("Spin", "Selected "+spin.selectedItem.toString())
+
+        var columnList = arrayListOf<String>()
         for(column in columns) {
             val colName = column.findViewById<TextInputLayout>(R.id.column_input).editText?.text.toString()
             if(colName == "") {
                 Toast.makeText(this, "Names of columns must be specified", Toast.LENGTH_LONG).show()
                 return
             }
-            schema.addColumn(colName, "INT")
+            columnList.add(colName)
         }
 
+        //DatabaseHelper(this).createTable(schema)
+        DatabaseHelper(this).createNewDataset(name, columnList, 0)
 
-        schema.setXAxisColumn(spin.selectedItem.toString())
-        Log.v("Spin", "Selected "+spin.selectedItem.toString())
-
-        DatabaseHelper(this).createTable(schema)
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)
         setResult(Activity.RESULT_OK, resultIntent)

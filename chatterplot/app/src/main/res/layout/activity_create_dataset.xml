@@ -55,6 +55,18 @@
             </com.google.android.material.textfield.TextInputLayout>
         </RelativeLayout>
 
+        <CheckBox
+            android:id="@+id/categoricalCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="Categorical Data"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/dataset_name"/>
+
         <Spinner
             android:id="@+id/xAxisSpinner"
             android:layout_width="wrap_content"
@@ -63,7 +75,7 @@
             android:layout_marginTop="8dp"
             android:spinnerMode="dropdown"
             app:layout_constraintStart_toEndOf="@+id/xAxisSpinnerLabel"
-            app:layout_constraintTop_toBottomOf="@+id/dataset_name" />
+            app:layout_constraintTop_toBottomOf="@+id/categoricalCheck" />
 
         <TextView
             android:id="@+id/xAxisSpinnerLabel"
@@ -87,6 +99,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/xAxisSpinner"
             app:srcCompat="@drawable/ic_baseline_refresh_24" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.core.widget.ContentLoadingProgressBar
         android:layout_width="wrap_content"

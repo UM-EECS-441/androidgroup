@@ -53,6 +53,7 @@ class SpeechProcessor(ctext: Context) {
 //                numbers.add(words[idx].toIntOrNull() ?: return false)
             }
             var columns = DatabaseHelper(context).getColumnNames(name!!)
+            Log.e("columns", columns.toString())
             if (data.size != columns.size - 2) {
                 Log.i("SpeechRecognizer", "invalid data columns input: ${data.size}, table: ${columns.size - 2}")
                 Log.i("dataset", columns.joinToString(" "))
@@ -66,7 +67,7 @@ class SpeechProcessor(ctext: Context) {
         return false
     }
 
-    private fun insertWithColumnName(text: String, columnNames: Array<String>,
+    private fun insertWithColumnName(text: String, columnNames: ArrayList<String>,
                                      data: ArrayList<String>): ArrayList<String> {
         val indicies = ArrayList<Int>()
         for (word in text.split(" ")) {
@@ -92,7 +93,7 @@ class SpeechProcessor(ctext: Context) {
             var nameStart = text.length
             var nameEnd = text.length
             var numColumns: Int = 0
-            var columnNames = mutableListOf<String>()
+            var columnNames = arrayListOf<String>()
             try {
                 for ((idx, word) in text.split(" ").withIndex()) {
                     Log.i("SpeechRecognizer", "text response word: ".plus(word))
@@ -119,7 +120,7 @@ class SpeechProcessor(ctext: Context) {
                             columnCount += 1
                         }
                         if (columnCount == 0) {
-                            columnNames = arrayListOf("A", "B", "C", "D", "E").take(numColumns).toMutableList()
+                            columnNames = ArrayList(arrayListOf("A", "B", "C", "D", "E").take(numColumns))
                         }
                         Log.i("SpeechRecognizer", "column names: ".plus(columnNames.joinToString(" ")))
                         break
@@ -131,9 +132,9 @@ class SpeechProcessor(ctext: Context) {
                 // Run create dataset function
 
                 if (columnNames.isEmpty()) {
-                    DatabaseHelper(context).createDataset(name!!, mutableListOf<String>("Y"))
+                    DatabaseHelper(context).createNewDataset(name!!, arrayListOf<String>("Y"), 0)
                 } else {
-                    DatabaseHelper(context).createDataset(name!!, columnNames)
+                    DatabaseHelper(context).createNewDataset(name!!, columnNames, 0)
                 }
                 Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
                 Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()

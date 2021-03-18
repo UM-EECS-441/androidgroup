@@ -71,9 +71,9 @@ class InsertDataActivity : AppCompatActivity() {
 
     private fun insertFunction(insertValues : ArrayList<Pair<String, String>>) {
         DatabaseHelper(this).insertData(datasetName, insertValues)
-        val t = Toast.makeText(this, "Data point added!", Toast.LENGTH_LONG)
+        val t = Toast.makeText(this, "Data added!", Toast.LENGTH_LONG)
         t.show()
-        createPreview(this, datasetName)
+        //createPreview(this, datasetName) BROKEN UNTIL GRAPHS ARE FIXED
         val resultIntent= Intent()
         setResult(Activity.RESULT_OK, resultIntent)
         finish()

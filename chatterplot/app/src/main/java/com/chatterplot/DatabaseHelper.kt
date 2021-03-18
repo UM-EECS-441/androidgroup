@@ -2,18 +2,13 @@ package com.chatterplot
 
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.database.Cursor
+import android.database.DatabaseUtils
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import android.view.View
-import android.widget.Toast
 import java.io.File
-import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -32,8 +27,12 @@ class Schema(val name: String) {
 // 0 - MM/dd/YY HH:mm
 // 1 - MM/dd/YYYY
 // 2 - Unix Epoch Milliseconds (no conversion)
-
-class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
+    context,
+    DATABASE_NAME,
+    null,
+    DATABASE_VERSION
+) {
     override fun onCreate(db: SQLiteDatabase?) {
 
         val masterInit = "CREATE TABLE MASTER (TableName TEXT, ColumnName TEXT, Data INTEGER, Timestamp INTEGER)"
@@ -89,6 +88,11 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         return colNames
     }
 
+    private fun getColumnCount(tableName: String): Long {
+        val db = this.readableDatabase
+        return DatabaseUtils.queryNumEntries(db, tableName)
+    }
+
     // insertData: adds data input to database
     //
     // IN: datasetname - String - The name of the target dataset
@@ -125,7 +129,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         for(row in values){
             val sqlval = ContentValues()
             for(i in 0 until row.size) {
-                sqlval.put("[${colNames[i+2]}]", row[i])
+                sqlval.put("[${colNames[i + 2]}]", row[i])
             }
             sqlval.put("Timestamp", time)
             db.insertOrThrow("[$tableName]", null, sqlval)
@@ -134,22 +138,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.endTransaction()
     }
 
-//    fun editValue(tableName: String, row: Int, column: String, value: String) {
-//        val db = this.writableDatabase
-//        var newValues: ContentValues = ContentValues()
-//        newValues.put(column, value)
-//        Log.d("welp content vals", newValues.toString())
-//        //newValues.put("Timestamp", Instant.now().toEpochMilli())
-//        db.update(tableName, newValues, "ID=$row", null)
-//        updateTimestamp(tableName)
-//    }
-
-    fun deleteRow(tableName:String, where:String?, args:Array<String>?) {
-        val db = this.writableDatabase
-        db.delete(tableName, where, args)
-    }
-
-    fun updateRow(tableName:String, values:ContentValues, where:String?, args: Array<String>?) {
+    fun updateRow(tableName: String, values: ContentValues, where: String?, args: Array<String>?) {
         this.writableDatabase.update("\'" + tableName + "\'", values, where, args)
         updateTimestamp(tableName)
     }
@@ -167,7 +156,16 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun getXAxisColumn(datasetName: String): String {
         val db = this.writableDatabase
-        val cursor = db.query("DIRECTORY", arrayOf("xAxis"), "TableName='$datasetName'", null, null, null, null, null)
+        val cursor = db.query(
+            "DIRECTORY",
+            arrayOf("xAxis"),
+            "TableName='$datasetName'",
+            null,
+            null,
+            null,
+            null,
+            null
+        )
         var result = "Timestamp"
         while (cursor.moveToNext()) {
             result = cursor.getString(0)
@@ -180,7 +178,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         val cv = ContentValues()
         cv.put("xAxis", newXAxis)
-        db.update("DIRECTORY", cv, "TableName='$datasetName'",null)
+        db.update("DIRECTORY", cv, "TableName='$datasetName'", null)
     }
 
 
@@ -188,12 +186,21 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         val db = this.writableDatabase
         val cv = ContentValues()
         cv.put("TimeFormat", timeCode)
-        db.update("DATASET", cv, "TableName='$datasetName'",null)
+        db.update("DATASET", cv, "TableName='$datasetName'", null)
     }
 
     fun getTimeFormat(datasetName: String): Int {
         val db = this.writableDatabase
-        val cursor = db.query("DATASET", arrayOf("TimeFormat"), "TableName='$datasetName'", null, null, null, null, null)
+        val cursor = db.query(
+            "DATASET",
+            arrayOf("TimeFormat"),
+            "TableName='$datasetName'",
+            null,
+            null,
+            null,
+            null,
+            null
+        )
         var result = 0
         while (cursor.moveToNext()) {
             result = cursor.getInt(0)
@@ -291,6 +298,53 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
         tables.close()
         return result
+    }
+
+    fun isolateDataset(tableName: String): ArrayList<ArrayList<String?>> {
+        val db: SQLiteDatabase = this.writableDatabase
+        val cur = db.query(
+            "MASTER",
+            arrayOf("ColumnName", "Data", "Timestamp"),
+            "TableName = \"$tableName\"",
+            null,
+            null,
+            null,
+            "Timestamp"
+        )
+
+        val columns = getColumnNames(tableName)
+        var tableMap = mutableMapOf<Int, ArrayList<Pair<String, Int>>>()
+
+        while (cur.moveToNext()) {
+            if (tableMap.containsKey(cur.getInt(2))) {
+                tableMap[cur.getInt(2)]!!.add(Pair(cur.getString(0), cur.getInt(1)))
+            } else {
+                tableMap.putIfAbsent(cur.getInt(2), arrayListOf(Pair(cur.getString(0), cur.getInt(1))))
+            }
+        }
+
+        val sortedTableMap = tableMap.toSortedMap()
+
+        var arrayOut = arrayListOf<ArrayList<String?>>()
+        sortedTableMap.forEach { (t, u) ->
+            var rowArray = arrayListOf<String?>()
+            rowArray.add(t.toString())
+            var uChecker = 0
+            val uSize = u.size
+            Log.d("ISOLATE-uchecker", uChecker.toString())
+            Log.d("ISOLATE-uSize", uSize.toString())
+            for (col in columns) {
+                if (uChecker >= uSize || u[uChecker].first != col) {
+                    rowArray.add("-")
+                } else {
+                    rowArray.add(u[uChecker].second.toString())
+                    ++uChecker
+                }
+            }
+            arrayOut.add(rowArray)
+        }
+        cur.close()
+        return arrayOut
     }
 
     companion object {

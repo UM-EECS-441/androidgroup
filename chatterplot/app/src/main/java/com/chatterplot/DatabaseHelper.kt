@@ -103,14 +103,62 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         val time = Instant.now().toEpochMilli()
         val sqlRow = ContentValues()
         val db = this.writableDatabase
-        dataList.forEach {
-            sqlRow.put("TableName", datasetName)
-            sqlRow.put("ColumnName", it.first)
-            sqlRow.put("Data", it.second)
-            sqlRow.put("Timestamp", time)
-            db.insertOrThrow("MASTER", null, sqlRow)
+        if (!isCategorical(datasetName)) {
+            dataList.forEach {
+                sqlRow.put("TableName", datasetName)
+                sqlRow.put("ColumnName", it.first)
+                sqlRow.put("Data", it.second)
+                sqlRow.put("Timestamp", time)
+                db.insertOrThrow("MASTER", null, sqlRow)
+            }
+            Log.d("SQLInsert", "Added ${dataList.size} data points to MASTER")
+        } else { //if we're dealing with categorical Data
+            val cur = db.query(
+                    "MASTER",
+                    arrayOf("ColumnName"),
+                    "TableName = \"$datasetName\"",
+                    null,
+                    null,
+                    null,
+                    null
+            )
+            var existingCategories = arrayListOf<String>()
+            while (cur.moveToNext()) {
+                existingCategories.add(cur.getString(0))
+            }
+            cur.close()
+            dataList.forEach {
+                if (existingCategories.contains(it.first)) {
+                    updateViaCategory(datasetName, it.first, it.second.toInt())
+                } else {
+                    sqlRow.put("TableName", datasetName)
+                    sqlRow.put("ColumnName", it.first)
+                    sqlRow.put("Data", it.second)
+                    sqlRow.put("Timestamp", time)
+                    db.insertOrThrow("MASTER", null, sqlRow)
+                }
+            }
         }
-        Log.d("SQLInsert", "Added ${dataList.size} data points to MASTER")
+    }
+
+    private fun updateViaCategory(tableName: String, category: String, delta: Int) {
+        val sqlRow = ContentValues()
+        val db = this.writableDatabase
+        var currentVal = 0
+        val cur = db.query(
+                "MASTER",
+                arrayOf("Data"),
+                "TableName = \"$tableName\" AND ColumnName = \"$category\"",
+                null,
+                null,
+                null,
+                null
+        )
+        while (cur.moveToNext()) {
+            currentVal = cur.getInt(0)
+        }
+        sqlRow.put("Data", delta + currentVal)
+        db.update("MASTER", sqlRow, "TableName = \"$tableName\" AND ColumnName = \"$category\"", null)
     }
 
     //Just to this compiles until I fix speech processing
@@ -118,6 +166,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         Log.d("Uhh", "This is gone")
     }
 
+    //Defunct, until speech processing is fixed
     fun insertRows(tableName: String, values: ArrayList<ArrayList<String>>) {
         val colNames = getColumnNames(tableName)
         if(colNames.size - 2 != values[0].size) {
@@ -136,6 +185,13 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         }
         db.setTransactionSuccessful()
         db.endTransaction()
+    }
+
+    fun insertColumn(tableName: String, colName: String) {
+        val sqlRow = ContentValues()
+        val db = this.writableDatabase
+        sqlRow.put("ColName", colName)
+        db.insertOrThrow(tableName, null, sqlRow)
     }
 
     fun updateRow(tableName: String, values: ContentValues, where: String?, args: Array<String>?) {
@@ -209,8 +265,29 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         return result
     }
 
+    fun isCategorical(datasetName: String): Boolean {
+        val db = this.writableDatabase
+        val cursor = db.query(
+                "DIRECTORY",
+                arrayOf("isCategorical"),
+                "TableName='$datasetName'",
+                null,
+                null,
+                null,
+                null,
+                null
+        )
+        var result = 0
+        while (cursor.moveToNext()) {
+            result = cursor.getInt(0)
+        }
+        cursor.close()
+        return (result == 1)
+    }
+
     fun formatTime(datasetName: String, time: Long): String {
-        val timeCode = getTimeFormat(datasetName)
+        val timeCode = 0;
+        //val timeCode = getTimeFormat(datasetName)
         val sdf: android.icu.text.SimpleDateFormat
         if (timeCode == 0) {
             sdf = android.icu.text.SimpleDateFormat("MM/dd HH:mm")
@@ -266,7 +343,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         }
         colQuery = colQuery.dropLast(1)
         db.execSQL(colQuery)
-
         db.execSQL("INSERT INTO DIRECTORY (TableName, isCategorical, xAxis, TimeFormat) VALUES ('$tableName', $categorical, 'Timestamp', 0)")
         Log.d("SQL", "Created new dataset $tableName")
     }
@@ -300,6 +376,9 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         return result
     }
 
+    // isolateDataset: isolates a single dataset's data from the Master table and returns it
+    //                 as an arrayList of row arrayLists, following the format
+    //                 {Timestamp, col1 Data, col2 Data, ...}
     fun isolateDataset(tableName: String): ArrayList<ArrayList<String?>> {
         val db: SQLiteDatabase = this.writableDatabase
         val cur = db.query(
@@ -313,13 +392,13 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         )
 
         val columns = getColumnNames(tableName)
-        var tableMap = mutableMapOf<Int, ArrayList<Pair<String, Int>>>()
+        var tableMap = mutableMapOf<Long, ArrayList<Pair<String, Int>>>()
 
         while (cur.moveToNext()) {
-            if (tableMap.containsKey(cur.getInt(2))) {
-                tableMap[cur.getInt(2)]!!.add(Pair(cur.getString(0), cur.getInt(1)))
+            if (tableMap.containsKey(cur.getLong(2))) {
+                tableMap[cur.getLong(2)]!!.add(Pair(cur.getString(0), cur.getInt(1)))
             } else {
-                tableMap.putIfAbsent(cur.getInt(2), arrayListOf(Pair(cur.getString(0), cur.getInt(1))))
+                tableMap.putIfAbsent(cur.getLong(2), arrayListOf(Pair(cur.getString(0), cur.getInt(1))))
             }
         }
 
@@ -328,11 +407,9 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         var arrayOut = arrayListOf<ArrayList<String?>>()
         sortedTableMap.forEach { (t, u) ->
             var rowArray = arrayListOf<String?>()
-            rowArray.add(t.toString())
+            if (!isCategorical(tableName)) rowArray.add(t.toString())
             var uChecker = 0
             val uSize = u.size
-            Log.d("ISOLATE-uchecker", uChecker.toString())
-            Log.d("ISOLATE-uSize", uSize.toString())
             for (col in columns) {
                 if (uChecker >= uSize || u[uChecker].first != col) {
                     rowArray.add("-")

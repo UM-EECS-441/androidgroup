@@ -15,6 +15,7 @@ import com.github.aachartmodel.aainfographics.aachartcreator.AAChartType
 import com.github.aachartmodel.aainfographics.aachartcreator.AAChartView
 import com.github.aachartmodel.aainfographics.aachartcreator.AASeriesElement
 import com.github.aachartmodel.aainfographics.aaoptionsmodel.AADataLabels
+import com.github.aachartmodel.aainfographics.aaoptionsmodel.AATooltip
 import com.google.android.material.bottomappbar.BottomAppBar
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -30,19 +31,13 @@ class GraphActivity : AppCompatActivity() {
         tableName = intent.getStringExtra("DATASETNAME")
         chartView = findViewById<AAChartView>(R.id.aa_chart_view)
         supportActionBar?.title = tableName
-//        preview = AAChartView(this)
-//        preview.layout(0, 0, 1000, 400)
-        createPreview(this, tableName)
-        graphDataset("line")
+        var chartType = "line"
+        if (DatabaseHelper(this).isCategorical(tableName)) chartType = "column"
+        graphDataset(chartType)
         val my_button = findViewById<Button>(R.id.chart_menu_button)
         my_button.setOnClickListener {
             showPopup(my_button)
         }
-//
-//        Handler().postDelayed({
-//            val bitmap = convertViewToBitmap(preview as View)
-//            saveBitmap(this, bitmap, "$tableName.png")
-//        }, 5000)
 
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
@@ -85,11 +80,11 @@ class GraphActivity : AppCompatActivity() {
 
         }
     }
+
     private fun graphDataset(chartType: String) {
-        val data = DatabaseHelper(this).getTable(tableName)
+        val data = DatabaseHelper(this).isolateDataset(tableName)
+        val columns = DatabaseHelper(this).getColumnNames(tableName)
         val graphData = ArrayList<AASeriesElement>()
-        val xAxisColumnName = DatabaseHelper(this).getXAxisColumn(tableName)
-        val xValArray = data[xAxisColumnName] ?: ArrayList()
         var chartToDisp = AAChartType.Line
         when (chartType) {
             "line" -> chartToDisp = AAChartType.Line
@@ -100,41 +95,28 @@ class GraphActivity : AppCompatActivity() {
         val my_button = findViewById<Button>(R.id.chart_menu_button)
         my_button.text = chartType
 
-        for((key,value) in data) {
-
-            if(key != "ID" && key != "Timestamp" && key != xAxisColumnName) {
-                val currentData = Array(value.size) {
-                    arrayOf(xValArray[it].toString().toLong(), (value[it] as String).toInt())
-                }
-                val sorted = currentData.sortedWith(compareBy {it[0].toString().toLong()})
-                val current = AASeriesElement().name(key).data(sorted.toTypedArray())
-                graphData.add(current)
-                val temp = Array<Any>(value.size) {
-                    arrayOf(xValArray[it], (value[it] as String).toInt())
+        for (c in 1 until columns.size+1) {
+            Log.d("Column Loop", "Looping to Column " + columns[c-1])
+            val colData = arrayListOf<Array<Any>>()
+            for (row in data) {
+                if (row[c]!! != "-") {
+                    Log.d("Graphing", "Adding Datapoint")
+                    colData.add(arrayOf(row[0]!!.toLong(), row[c]!!.toInt()))
                 }
             }
+            val currentLine = AASeriesElement().name(columns[c-1]).data(colData.toTypedArray())
+            graphData.add(currentLine)
         }
+
 
         val chartModel = AAChartModel()
             .chartType(chartToDisp)
             .title(tableName)
-            .subtitle("")
             .backgroundColor("#FFFFFF")
             .dataLabelsEnabled(true)
             .series(graphData.toTypedArray())
             .xAxisLabelsEnabled(false)
-//            .xAxisLabelsEnabled(true)
         chartView.aa_drawChartWithChartModel(chartModel)
-
-//        preview.aa_drawChartWithChartModel(chartModel
-//            .legendEnabled(false)
-//            .yAxisLabelsEnabled(false)
-//            .title("")
-//            .yAxisTitle("")
-//            .dataLabelsEnabled(false)
-//            .xAxisTickInterval(0)
-//            .yAxisGridLineWidth(0F)
-//            .xAxisVisible(false))
     }
 
     private fun showPopup(view: View) {
@@ -163,63 +145,4 @@ class GraphActivity : AppCompatActivity() {
 
         popup.show()
     }
-//    fun createLineChart() {
-//        val chart = LineChart(this)
-//
-//        val frame = findViewById<RelativeLayout>(R.id.graph_frame)
-//        val params = frame.layoutParams
-//        params.width = RelativeLayout.LayoutParams.MATCH_PARENT
-//        params.height = RelativeLayout.LayoutParams.MATCH_PARENT
-//        chart.layoutParams = params
-//        frame.addView(chart)
-//
-//        val mockData = listOf<Entry>(Entry(1F, 4F), Entry(2F, 4F), Entry(3F, 4F), Entry(4F, 5F))
-//        val dataSet = LineDataSet(mockData, "Label")
-//        val lineData = LineData(dataSet)
-//        chart.data = lineData
-//        chart.invalidate()
-//    }
-
-//    fun createBarChart() {
-//        val chart = BarChart(this)
-//        val frame = findViewById<RelativeLayout>(R.id.graph_frame)
-//        val params = frame.layoutParams
-//        params.width = RelativeLayout.LayoutParams.MATCH_PARENT
-//        params.height = RelativeLayout.LayoutParams.MATCH_PARENT
-//        chart.layoutParams = params
-//        frame.addView(chart)
-//
-//        val mockData = listOf(BarEntry(0F, 10F), BarEntry(1F, 12F), BarEntry(2F, 30F), BarEntry(3F, 23F))
-//        val mockLabel = arrayOf("First", "Second", "Third", "Fifth")
-//        val dataSet = BarDataSet(mockData, "BarDataSet")
-//        val barData = BarData(dataSet)
-//        barData.setValueTextSize(16F)
-//        chart.data = barData
-//        chart.description.isEnabled = false
-//        chart.xAxis.isEnabled = true
-//        chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-//        chart.xAxis.setDrawGridLines(false)
-//        chart.animateXY(500, 1000)
-//        chart.axisLeft.axisMinimum = 0F
-//        chart.xAxis.valueFormatter = BarChartAxisFormatter(mockLabel)
-//        chart.xAxis.granularity = 1F
-//        chart.xAxis.textSize = 18F
-//        chart.axisLeft.textSize = 16F
-//        chart.axisRight.isEnabled = false
-//        chart.isScaleYEnabled = false
-//        chart.isHighlightPerDragEnabled = false
-//        chart.invalidate()
-//    }
 }
-
-//class BarChartAxisFormatter(private val axisLabel : Array<String>) : ValueFormatter() {
-//    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-//        return axisLabel[value.toInt()]
-//    }
-//}
-
-//class BarChartSelectedListener : OnChartValueSelectedListener {
-//    override fun onValueSelected(e: Entry?, h: Highlight?) {
-//        e.
-//    }
-//}

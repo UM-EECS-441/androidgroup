@@ -30,6 +30,7 @@ class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var columns: ArrayList<View>
 
     lateinit var spin: Spinner
+    lateinit var categoricalCheck: CheckBox
     lateinit var adapter: ArrayAdapter<String>
     lateinit var refreshButton: ImageButton
 
@@ -54,6 +55,8 @@ class CreateDatasetActivity : AppCompatActivity() {
         adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayListOf("Timestamp"))
         refreshButton = findViewById<ImageButton>(R.id.spinnerRefreshButton)
         spin.adapter = adapter
+
+        categoricalCheck = findViewById(R.id.categoricalCheck)
 
         disableSpinner()
 
@@ -234,7 +237,9 @@ class CreateDatasetActivity : AppCompatActivity() {
         }
 
         //DatabaseHelper(this).createTable(schema)
-        DatabaseHelper(this).createNewDataset(name, columnList, 0)
+        var catCheckInt = 0
+        if (categoricalCheck.isChecked) catCheckInt = 1
+        DatabaseHelper(this).createNewDataset(name, columnList, catCheckInt)
 
         val resultIntent = Intent()
         resultIntent.putExtra("NAME", name)

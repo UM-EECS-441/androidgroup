@@ -67,6 +67,8 @@ class InsertDataActivity : AppCompatActivity() {
             }
             insertFunction(inputPairs)
         }
+
+        Log.e("colViews", columns.toString())
     }
 
     private fun insertFunction(insertValues : ArrayList<Pair<String, String>>) {

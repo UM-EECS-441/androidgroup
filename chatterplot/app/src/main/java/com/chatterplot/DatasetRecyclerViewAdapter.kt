@@ -51,7 +51,7 @@ open class DatasetRecyclerViewAdapter(private var datasetCardList: ArrayList<Dat
 
         holder.itemView.setOnClickListener {
             //val intent = Intent(context, DisplayDataActivity::class.java)
-            val intent = Intent(context, DisplayTableActivity::class.java)
+            val intent = Intent(context, DisplayDataActivity::class.java)
             intent.putExtra("DATASETNAME", currentItem.name)
             context.startActivity(intent)
         }

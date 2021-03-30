@@ -84,6 +84,7 @@ class GraphActivity : AppCompatActivity() {
     private fun graphDataset(chartType: String) {
         val data = DatabaseHelper(this).isolateDataset(tableName)
         val columns = DatabaseHelper(this).getColumnNames(tableName)
+        val isCategorical = DatabaseHelper(this).isCategorical(tableName)
         val graphData = ArrayList<AASeriesElement>()
         var chartToDisp = AAChartType.Line
         when (chartType) {
@@ -95,17 +96,51 @@ class GraphActivity : AppCompatActivity() {
         val my_button = findViewById<Button>(R.id.chart_menu_button)
         my_button.text = chartType
 
-        for (c in 1 until columns.size+1) {
-            Log.d("Column Loop", "Looping to Column " + columns[c-1])
+        if (!isCategorical) {
+            for (c in 1 until columns.size + 1) {
+                Log.d("Column Loop", "Looping to Column " + columns[c - 1])
+                val colData = arrayListOf<Array<Any>>()
+                for (row in data) {
+                    if (row[c]!! != "-") {
+                        Log.d("Graphing", "Adding Datapoint")
+                        colData.add(arrayOf(row[0]!!.toLong(), row[c]!!.toInt()))
+                    }
+                }
+                val currentLine = AASeriesElement().name(columns[c - 1]).data(colData.toTypedArray())
+                graphData.add(currentLine)
+            }
+        } else if (chartType == "pie") {
+            var total = 0
+            for (c in 0 until columns.size) {
+                total += data[0][c]!!.toInt()
+            }
+            val denominator = total
             val colData = arrayListOf<Array<Any>>()
-            for (row in data) {
-                if (row[c]!! != "-") {
+            for (c in 0 until columns.size) {
+                Log.d("Category Loop", "Looping to Category " + columns[c])
+
+                if (data[0][c]!! != "-") {
                     Log.d("Graphing", "Adding Datapoint")
-                    colData.add(arrayOf(row[0]!!.toLong(), row[c]!!.toInt()))
+                    colData.add(arrayOf(columns[c], (data[0][c]!!.toInt().toFloat() / denominator)))
                 }
             }
-            val currentLine = AASeriesElement().name(columns[c-1]).data(colData.toTypedArray())
-            graphData.add(currentLine)
+            val pieCat = AASeriesElement().name("Proportion").data(colData.toTypedArray())
+            graphData.add(pieCat)
+
+        } else {
+            for (c in 0 until columns.size) {
+                val colData = arrayListOf<Array<Any>>()
+                Log.d("Category Loop", "Looping to Category " + columns[c])
+
+                if (data[0][c]!! != "-") {
+                    Log.d("Graphing", "Adding Datapoint")
+                    colData.add(arrayOf("Values", data[0][c]!!.toInt()))
+                }
+                val barCat = AASeriesElement().name(columns[c]).data(colData.toTypedArray())
+                graphData.add(barCat)
+            }
+
+
         }
 
 

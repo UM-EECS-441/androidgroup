@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        showTutorial(null)
+        //showTutorial(null)
 
         val datasetList = getDatabases()
 

@@ -24,66 +24,48 @@ class SpeechProcessor(ctext: Context) {
     }
 
     private fun insertDataset(text:String, tableName:String?):Boolean {
-        if((text.contains("insert") || text.contains("add") ||
-                    text.contains("enter"))) {
-            val words= text.split(" ").toMutableList()
-//            val numbers = ArrayList<Int>()
+        var words = text.split(" ").toMutableList()
+        if(words[0] == "insert" || words[0] == "add" || words[0] == "enter") {
+
+            //remove the primer word from the command
             words.removeAt(0)
+
+            //remove any ands from the command so it has only column names and values followed by "into [dataset]"
+            while (words.indexOf("and") != -1) {
+                words.removeAt(words.indexOf("and"))
+            }
             name = tableName
+
             if (tableName == null) {
-                val idx = text.indexOf("into")
-                if (idx == -1 || idx + 5 >= text.length) return false
-                name = text.substring(idx + 5).capitalize()
+                val idx = words.indexOf("into")
+                if (idx == -1 || idx == words.size - 1) return false
+                name = words[idx + 1].capitalize()
                 if (!DatabaseHelper(context).getAllDatabaseNames().contains(name!!)) {
                     return false
                 }
                 Log.i("SpeechRecognizer", "dataset name: ".plus(name))
             }
-            var data = ArrayList<String>()
-            for(word in words) {
-                if (word == "into") break
-                if (word != "and" && word != "+") {
-                    if(word.toIntOrNull() == null) {
-                        continue
-                    }
-                    else {
-                        data.add(word)
-                    }
-                }
-//                numbers.add(words[idx].toIntOrNull() ?: return false)
-            }
+
             var columns = DatabaseHelper(context).getColumnNames(name!!)
             Log.e("columns", columns.toString())
-            if (data.size != columns.size - 2) {
-                Log.i("SpeechRecognizer", "invalid data columns input: ${data.size}, table: ${columns.size - 2}")
-                Log.i("dataset", columns.joinToString(" "))
-                Toast.makeText(context, "Invalid data entry", Toast.LENGTH_SHORT).show()
-                return false
+
+            var data = ArrayList<Pair<String, String>>()
+            for (w in words.indices step 2) {
+                if (words[w] == "into") break
+                val num = textToInt(words[w]) ?: return false
+                val colName = words[w+1]
+                if (columns.contains(colName.capitalize()) || columns.contains(colName)) {
+                    data.add(Pair(colName.capitalize(), num.toString()))
+                } else {
+                    Log.e("VoiceInsert", "Invalid Column")
+                    return false
+                }
             }
-            data = insertWithColumnName(text, columns, data)
-            DatabaseHelper(context).insertRow(name!!, data)
+
+            DatabaseHelper(context).insertData(name!!, data)
             return true
         }
         return false
-    }
-
-    private fun insertWithColumnName(text: String, columnNames: ArrayList<String>,
-                                     data: ArrayList<String>): ArrayList<String> {
-        val indicies = ArrayList<Int>()
-        for (word in text.split(" ")) {
-            val idx = columnNames.indexOf(word)
-            if (idx != -1) {
-                indicies.add(idx)
-            }
-        }
-        if (indicies.size != columnNames.size - 2) return data
-
-        val newdata = ArrayList<String>(data)
-        Log.i("insert", newdata.joinToString(" "))
-        for ((idx, v) in data.withIndex()) {
-            newdata[indicies[idx] - 2] = v
-        }
-        return newdata
     }
 
     private fun createDataset(text: String): Boolean {
@@ -106,7 +88,7 @@ class SpeechProcessor(ctext: Context) {
                         try {
                             numColumns = textList[idx - 1].toInt()
                         } catch (e:Exception) {
-                            numColumns = this.textToInt(textList[idx - 1])
+                            numColumns = this.textToInt(textList[idx - 1])!!
                             if (numColumns == -1 || numColumns > 5) {
                                 Toast.makeText(context, "Invalid column number", Toast.LENGTH_SHORT).show()
                                 throw Exception("Invalid column number")
@@ -147,18 +129,33 @@ class SpeechProcessor(ctext: Context) {
         return false
     }
 
-    private fun textToInt(text: String): Int {
+    private fun textToInt(text: String): Int? {
         when (text.toLowerCase()) {
             "one" -> {
                 return 1
             }
+            "won" -> {
+                return 1
+            }
             "two" -> {
+                return 2
+            }
+            "too" -> {
+                return 2
+            }
+            "to" -> {
                 return 2
             }
             "three" -> {
                 return 3
             }
             "four" -> {
+                return 4
+            }
+            "for" -> {
+                return 4
+            }
+            "fore" -> {
                 return 4
             }
             "five" -> {
@@ -173,13 +170,22 @@ class SpeechProcessor(ctext: Context) {
             "eight" -> {
                 return 8
             }
+            "ate" -> {
+                return 8
+            }
             "nine" -> {
+                return 9
+            }
+            "nein" -> {
                 return 9
             }
             "zero" -> {
                 return 0
             }
-            else -> return -1
+            "ten" -> {
+                return 10
+            }
+            else -> return text.toIntOrNull()
         }
     }
 }

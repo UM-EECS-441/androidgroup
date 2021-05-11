@@ -33,8 +33,6 @@ class TableAdapter {
         tableView = (this.context as DisplayDataActivity).findViewById(R.id.dataDisplayTable)
         tableData = DatabaseHelper(this.context!!).isolateDataset(tableNameDB)
         columns = DatabaseHelper(this.context!!).getColumnNames(tableNameDB)
-        //xAxisColName = DatabaseHelper(this.context!!).getXAxisColumn(tableNameDB)
-
     }
 
     fun refreshTable() {
@@ -58,7 +56,7 @@ class TableAdapter {
         val isCategorical = DatabaseHelper(this.context!!).isCategorical(tableNameDB)
         if (!isCategorical) {
             var rowText: TextView = titleRow.getChildAt(0) as TextView
-            rowText.text = "Time"
+            rowText.text = DatabaseHelper(this.context!!).getResolutionName(tableNameDB)
             rowText.setTypeface(null, Typeface.BOLD)
             i = 1
         }
@@ -82,11 +80,7 @@ class TableAdapter {
 
             for ((colNum, cell) in tableData[row].withIndex()) {
                 var rowText: TextView = newRow.getChildAt(colNum) as TextView
-                var cellText = cell
-                if (colNum == 0 && !isCategorical) {
-                    cellText = DatabaseHelper(this.context!!).formatTime(tableNameDB, cell!!.toLong())
-                }
-                rowText.text = cellText
+                rowText.text = cell
             }
             (tableView as ViewGroup).addView(newRow)
         }
@@ -148,12 +142,10 @@ class TableAdapter {
         return row
     }
 
-
     fun getDataRow(row: Int): List<Any> {
         Log.e("getDataRow", "Defunct")
         return listOf(0)
     }
-
 
     fun getNumRows(): Int {
         return tableData.size!!

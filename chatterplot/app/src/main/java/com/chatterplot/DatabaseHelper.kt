@@ -23,21 +23,20 @@ class Schema(val name: String) {
     }
 }
 
-// TimeFormat Codes using SimpleDateFormat:
-// 0 - MM/dd/YY HH:mm
-// 1 - MM/dd/YYYY
-// 2 - Unix Epoch Milliseconds (no conversion)
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
     context,
     DATABASE_NAME,
     null,
     DATABASE_VERSION
 ) {
+    private val resNames = arrayOf("Month", "Week", "Day", "Hour", "Minute")
+    private val resolutions = arrayOf<Long>(2628000000, 604800000, 86400000, 3600000, 60000)
+
     override fun onCreate(db: SQLiteDatabase?) {
 
         val masterInit = "CREATE TABLE MASTER (TableName TEXT, ColumnName TEXT, Data INTEGER, Timestamp INTEGER)"
         db!!.execSQL(masterInit)
-        val directoryInit = "CREATE TABLE DIRECTORY (TableName TEXT, isCategorical INTEGER, XAxis TEXT, TimeFormat INTEGER)"
+        val directoryInit = "CREATE TABLE DIRECTORY (TableName TEXT, isCategorical INTEGER, XAxis TEXT, TimeResolution INTEGER, StartTime INTEGER)"
         db!!.execSQL(directoryInit)
 
         Log.d("SQL", "Created MASTER and DIRECTORY table")
@@ -102,6 +101,10 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
     fun insertData(datasetName: String, dataList: ArrayList<Pair<String, String>>) {
         val time = Instant.now().toEpochMilli()
         val sqlRow = ContentValues()
+        val zero : Long = 0
+        if (getStartTime(datasetName) == zero) {
+            setStartTime(datasetName, time)
+        }
         val db = this.writableDatabase
         if (!isCategorical(datasetName)) {
             dataList.forEach {
@@ -237,25 +240,27 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         db.update("DIRECTORY", cv, "TableName='$datasetName'", null)
     }
 
-
-    fun setTimeFormat(datasetName: String, timeCode: Int) {
+    // setTimeResolution
+    // Saves the time resolution index to the Directory Table for a given dataset
+    // input: dataset name (String), time resolution index (Int)
+    fun setTimeResolution(datasetName: String, timeCode: Int) {
         val db = this.writableDatabase
         val cv = ContentValues()
-        cv.put("TimeFormat", timeCode)
-        db.update("DATASET", cv, "TableName='$datasetName'", null)
+        cv.put("TimeResolution", timeCode)
+        db.update("DIRECTORY", cv, "TableName='$datasetName'", null)
     }
 
-    fun getTimeFormat(datasetName: String): Int {
+    // getTimeResolution
+    // Returns the index of the time resolution for the given dataset
+    // input: dataset name string
+    // output: resolution index
+    fun getTimeResolution(datasetName: String): Int {
         val db = this.writableDatabase
         val cursor = db.query(
-            "DATASET",
-            arrayOf("TimeFormat"),
-            "TableName='$datasetName'",
-            null,
-            null,
-            null,
-            null,
-            null
+                "DIRECTORY",
+                arrayOf("TimeResolution"),
+                "TableName='$datasetName'",
+                null, null, null, null, null
         )
         var result = 0
         while (cursor.moveToNext()) {
@@ -263,6 +268,10 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         }
         cursor.close()
         return result
+    }
+
+    fun getResolutionName(datasetName: String): String {
+        return resNames[getTimeResolution(datasetName)]
     }
 
     fun isCategorical(datasetName: String): Boolean {
@@ -285,18 +294,9 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         return (result == 1)
     }
 
-    fun formatTime(datasetName: String, time: Long): String {
-        val timeCode = 0;
-        //val timeCode = getTimeFormat(datasetName)
-        val sdf: android.icu.text.SimpleDateFormat
-        if (timeCode == 0) {
-            sdf = android.icu.text.SimpleDateFormat("MM/dd HH:mm")
-        } else if (timeCode == 1) {
-            sdf = android.icu.text.SimpleDateFormat("MM/dd/YY")
-        } else {
-            return time.toString()
-        }
-        val netDate = Date(time)
+    fun formattedStartTime(datasetName: String): String {
+        val sdf: android.icu.text.SimpleDateFormat = android.icu.text.SimpleDateFormat("MM/dd/yy HH:mm")
+        val netDate = Date(getStartTime(datasetName))
         return sdf.format(netDate)
     }
 
@@ -343,7 +343,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         }
         colQuery = colQuery.dropLast(1)
         db.execSQL(colQuery)
-        db.execSQL("INSERT INTO DIRECTORY (TableName, isCategorical, xAxis, TimeFormat) VALUES ('$tableName', $categorical, 'Timestamp', 0)")
+        db.execSQL("INSERT INTO DIRECTORY (TableName, isCategorical, xAxis, TimeResolution, StartTime) VALUES ('$tableName', $categorical, 'Timestamp', 2, 0)")
         Log.d("SQL", "Created new dataset $tableName")
     }
 
@@ -376,10 +376,48 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         return result
     }
 
+    private fun getStartTime(tableName: String): Long {
+        val db = this.writableDatabase
+        val cursor = db.query(
+                "DIRECTORY",
+                arrayOf("StartTime"),
+                "TableName='$tableName'",
+                null,
+                null,
+                null,
+                null,
+                null
+        )
+        var result : Long = 0
+        while (cursor.moveToNext()) {
+            result = cursor.getLong(0)
+        }
+        cursor.close()
+        return result
+    }
+
+    private fun setStartTime(tableName: String, time: Long) {
+        val db = this.writableDatabase
+        val sqlval = ContentValues()
+        sqlval.put("StartTime", time)
+        db.update("DIRECTORY", sqlval, "TableName='${tableName}'", null)
+    }
+
+    //_____Time Conversions_____//
+    //                          //
+    // 1 month  = 2628000000 ms // 0
+    // 1 week   = 604800000  ms // 1
+    // 1 day    = 86400000   ms // 2
+    // 1 hour   = 3600000    ms // 3
+    // 1 minute = 60000      ms // 4
+    //__________________________//
+
     // isolateDataset: isolates a single dataset's data from the Master table and returns it
     //                 as an arrayList of row arrayLists, following the format
     //                 {Timestamp, col1 Data, col2 Data, ...}
     fun isolateDataset(tableName: String): ArrayList<ArrayList<String?>> {
+
+        val timeResolution = resolutions[getTimeResolution(tableName)]
         val db: SQLiteDatabase = this.writableDatabase
         val cur = db.query(
             "MASTER",
@@ -393,23 +431,31 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
 
         val columns = getColumnNames(tableName)
         var tableMap = mutableMapOf<Long, ArrayList<Pair<String, Int>>>()
+        val startTime = getStartTime(tableName)
 
         while (cur.moveToNext()) {
-            if (tableMap.containsKey(cur.getLong(2))) {
-                tableMap[cur.getLong(2)]!!.add(Pair(cur.getString(0), cur.getInt(1)))
+            var curTimestamp = cur.getLong(2)
+            curTimestamp -= startTime
+            curTimestamp /= timeResolution
+            if (tableMap.containsKey(curTimestamp)) {
+                tableMap[curTimestamp]!!.add(Pair(cur.getString(0), cur.getInt(1)))
             } else {
-                tableMap.putIfAbsent(cur.getLong(2), arrayListOf(Pair(cur.getString(0), cur.getInt(1))))
+                tableMap.putIfAbsent(curTimestamp, arrayListOf(Pair(cur.getString(0), cur.getInt(1))))
             }
         }
 
         val sortedTableMap = tableMap.toSortedMap()
 
         var arrayOut = arrayListOf<ArrayList<String?>>()
+        //For each 
         sortedTableMap.forEach { (t, u) ->
             var rowArray = arrayListOf<String?>()
             if (!isCategorical(tableName)) rowArray.add(t.toString())
-            var uChecker = 0
+
+            // Old implementation for raw per-input rows
+            /*
             val uSize = u.size
+            var uChecker = 0
             for (col in columns) {
                 if (uChecker >= uSize || u[uChecker].first != col) {
                     rowArray.add("-")
@@ -418,6 +464,26 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
                     ++uChecker
                 }
             }
+            */
+            
+            // New implementation for additive per-unit-of-time rows
+            for (col in columns) {
+                var hasData: Boolean = false
+                var colTotal = 0
+                for (inputPair in u) {
+                    if (inputPair.first == col) {
+                        hasData = true
+                        colTotal += inputPair.second
+                    }
+                }
+                if (!hasData) {
+                    rowArray.add("-")
+                } else {
+                    rowArray.add(colTotal.toString())
+                }
+            }
+            
+            
             arrayOut.add(rowArray)
         }
         cur.close()
@@ -426,6 +492,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
 
     companion object {
         private const val DATABASE_NAME = "Chatterplot.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
     }
 }

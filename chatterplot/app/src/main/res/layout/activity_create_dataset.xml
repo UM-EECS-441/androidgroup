@@ -32,8 +32,7 @@
             android:id="@+id/dataset_column_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/xAxisSpinner"
+            app:layout_constraintTop_toBottomOf="@+id/categoricalCheck"
             tools:layout_editor_absoluteX="0dp">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -66,39 +65,6 @@
             android:textColor="#000000"
             android:textSize="18sp"
             app:layout_constraintTop_toBottomOf="@id/dataset_name"/>
-
-        <Spinner
-            android:id="@+id/xAxisSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:spinnerMode="dropdown"
-            app:layout_constraintStart_toEndOf="@+id/xAxisSpinnerLabel"
-            app:layout_constraintTop_toBottomOf="@+id/categoricalCheck" />
-
-        <TextView
-            android:id="@+id/xAxisSpinnerLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="X-Axis:"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="@+id/xAxisSpinner"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/xAxisSpinner" />
-
-        <ImageButton
-            android:id="@+id/spinnerRefreshButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:background="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@+id/xAxisSpinner"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/xAxisSpinner"
-            app:srcCompat="@drawable/ic_baseline_refresh_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.core.widget.ContentLoadingProgressBar

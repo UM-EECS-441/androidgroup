@@ -29,10 +29,10 @@ import java.io.InputStreamReader
 class CreateDatasetActivity : AppCompatActivity() {
     private lateinit var columns: ArrayList<View>
 
-    lateinit var spin: Spinner
+    //lateinit var spin: Spinner
     lateinit var categoricalCheck: CheckBox
-    lateinit var adapter: ArrayAdapter<String>
-    lateinit var refreshButton: ImageButton
+    //lateinit var adapter: ArrayAdapter<String>
+    //lateinit var refreshButton: ImageButton
 
     private lateinit var progressBar: ProgressBar
     private val READ_PERMISSION = 20
@@ -51,19 +51,19 @@ class CreateDatasetActivity : AppCompatActivity() {
 
         columns = arrayListOf(findViewById<TextInputLayout>(R.id.dataset_column_1))
 
-        spin = findViewById(R.id.xAxisSpinner)
-        adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayListOf("Timestamp"))
-        refreshButton = findViewById<ImageButton>(R.id.spinnerRefreshButton)
-        spin.adapter = adapter
+        //spin = findViewById(R.id.xAxisSpinner)
+        //adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayListOf("Timestamp"))
+        //refreshButton = findViewById<ImageButton>(R.id.spinnerRefreshButton)
+        //spin.adapter = adapter
 
         categoricalCheck = findViewById(R.id.categoricalCheck)
 
-        disableSpinner()
+        //disableSpinner()
 
-        refreshButton.setOnClickListener {
-            refreshButton.animate().setDuration(250).rotationBy(360f).start()
-            updateSpinner(false)
-        }
+//        refreshButton.setOnClickListener {
+//            refreshButton.animate().setDuration(250).rotationBy(360f).start()
+//            updateSpinner(false)
+//        }
 
         progressBar = findViewById(R.id.import_progress_bar)
 
@@ -103,7 +103,7 @@ class CreateDatasetActivity : AppCompatActivity() {
 
     // Updates the X-Axis selection spinner to include all named columns as long as
     // there are more than 1 columns
-    private fun updateSpinner(isImport: Boolean) {
+    /*private fun updateSpinner(isImport: Boolean) {
         adapter.clear()
         if (!isImport) adapter.add("Timestamp")
 
@@ -118,20 +118,20 @@ class CreateDatasetActivity : AppCompatActivity() {
         } else {
             disableSpinner()
         }
-    }
+    }*/
 
-    private fun enableSpinner() {
+    /*private fun enableSpinner() {
         spin.isEnabled = true
         spin.alpha = 1f
         refreshButton.isEnabled = true
-    }
+    }*/
 
-    private fun disableSpinner() {
+    /*private fun disableSpinner() {
         spin.isEnabled = false
         spin.alpha = 0.75f
         spin.setSelection(0)
         refreshButton.isEnabled = false
-    }
+    }*/
 
     private fun addColumn(view : View?) {
         if(view == null) return
@@ -149,7 +149,7 @@ class CreateDatasetActivity : AppCompatActivity() {
         setter.applyTo(inputs)
         columns.add(layout)
 
-        updateSpinner(false)
+        //updateSpinner(false)
         Log.v("Spinner", "Updated")
 
 //        Snackbar.make(view, "Created a column", Snackbar.LENGTH_LONG)
@@ -202,8 +202,8 @@ class CreateDatasetActivity : AppCompatActivity() {
             deleteBtn.tag = i
         }
 
-        updateSpinner(false)
-        Log.e("Spinner", "Updated")
+        //updateSpinner(false)
+        //Log.e("Spinner", "Updated")
     }
 
     private fun createDataset() {
@@ -224,7 +224,7 @@ class CreateDatasetActivity : AppCompatActivity() {
 
 
 //        schema.setXAxisColumn(spin.selectedItem.toString())
-        Log.v("Spin", "Selected "+spin.selectedItem.toString())
+        //Log.v("Spin", "Selected "+spin.selectedItem.toString())
 
         var columnList = arrayListOf<String>()
         for(column in columns) {
@@ -364,7 +364,7 @@ class CreateDatasetActivity : AppCompatActivity() {
             if (idx == 0) {
                 runOnUiThread {
                     findViewById<TextInputLayout>(R.id.column_input).editText?.setText(column)
-                    updateSpinner(true)
+                    //updateSpinner(true)
                 }
             } else if (idx < columns.size) {
                 runOnUiThread {

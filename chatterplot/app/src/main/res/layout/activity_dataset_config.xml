@@ -13,62 +13,51 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/xAxisConfigSpinner"
+        android:id="@+id/timeResConfigSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="16dp"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toBottomOf="@+id/xAxisConfigSpinnerLabel"
+        app:layout_constraintBottom_toBottomOf="@+id/timeResConfigSpinnerLabel"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/xAxisConfigSpinnerLabel" />
+        app:layout_constraintTop_toTopOf="@+id/timeResConfigSpinnerLabel" />
 
     <TextView
-        android:id="@+id/xAxisConfigSpinnerLabel"
+        android:id="@+id/timeResConfigSpinnerLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        android:text="X-Axis:"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Time Resolution:"
         android:textColor="#000000"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/configTitle" />
 
-    <Spinner
-        android:id="@+id/timeFormatConfigSpinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toBottomOf="@+id/timeFormatConfigSpinnerLabel"
-        app:layout_constraintEnd_toEndOf="@+id/xAxisConfigSpinner"
-        app:layout_constraintStart_toStartOf="@+id/xAxisConfigSpinner"
-        app:layout_constraintTop_toTopOf="@+id/timeFormatConfigSpinnerLabel" />
-
-    <TextView
-        android:id="@+id/timeFormatConfigSpinnerLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Time Format:"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="@+id/xAxisConfigSpinnerLabel"
-        app:layout_constraintTop_toBottomOf="@+id/xAxisConfigSpinnerLabel" />
-
     <Button
         android:id="@+id/configSaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:text="Save"
-        app:layout_constraintEnd_toEndOf="@+id/timeFormatConfigSpinner"
-        app:layout_constraintTop_toBottomOf="@+id/timeFormatConfigSpinner" />
+        app:layout_constraintEnd_toEndOf="@+id/timeResConfigSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/resolutionHint" />
+
+    <TextView
+        android:id="@+id/resolutionHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/timeResConfigSpinnerLabel"
+        app:layout_constraintTop_toBottomOf="@+id/timeResConfigSpinnerLabel" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

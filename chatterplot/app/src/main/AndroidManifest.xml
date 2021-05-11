@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DatasetConfigActivity"></activity>
+        <activity android:name=".DisplayTableActivity"></activity>
+        <activity android:name=".TutorialActivity" />
+        <activity android:name=".DatasetConfigActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -53,10 +55,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="chatterplot"
-                    android:host="voice" />
+                    android:host="voice"
+                    android:scheme="chatterplot" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.android.actions"
             android:resource="@xml/actions" />

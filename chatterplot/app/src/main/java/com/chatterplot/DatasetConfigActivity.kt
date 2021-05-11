@@ -5,21 +5,15 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.TextView
-import java.util.ArrayList
+import android.view.View
+import android.widget.*
 
 class DatasetConfigActivity : AppCompatActivity() {
 
     private lateinit var tableName:String
-    lateinit var xSpinner: Spinner
-    lateinit var xAdapter: ArrayAdapter<String>
-    lateinit var timeSpinner: Spinner
-    lateinit var timeAdapter: ArrayAdapter<String>
-    private lateinit var columnNames: List<String>
+    lateinit var timeResSpinner: Spinner
+    lateinit var timeResAdapter: ArrayAdapter<String>
+    lateinit var resolutionHint: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,55 +28,42 @@ class DatasetConfigActivity : AppCompatActivity() {
         val titleText : TextView = findViewById(R.id.configTitle)
         titleText.text = "Settings for \"$tableName\""
 
-        xSpinner = findViewById(R.id.xAxisConfigSpinner)
-        columnNames = DatabaseHelper(this).getColumnNames(tableName).drop(1) // don't fetch ID column
-        xAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, columnNames)
-        xSpinner.adapter = xAdapter
+        val timeFormats = arrayListOf("Month", "Week", "Day", "Hour", "Minute")
+        timeResSpinner = findViewById(R.id.timeResConfigSpinner)
+        timeResAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, timeFormats)
+        timeResSpinner.adapter = timeResAdapter
+        timeResSpinner.setSelection(DatabaseHelper(this).getTimeResolution(tableName))
 
-        val timeFormats = arrayListOf("Date & Time", "Date & Year", "Unix Time")
-        timeSpinner = findViewById(R.id.timeFormatConfigSpinner)
-        timeAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, timeFormats)
-        timeSpinner.adapter = timeAdapter
+        resolutionHint = findViewById(R.id.resolutionHint)
 
-        // Set spinners to display currently selected settings
-        //val spinPos = xColumnSpinnerPosition()
-        xSpinner.setSelection(xColumnSpinnerPosition())
+        updateHint(resolutionHint)
 
-        timeSpinner.setSelection(DatabaseHelper(this).getTimeFormat(tableName))
-
-        // Disable Spinner for single-column datasets, as they will always graph by time
-        if (columnNames.size < 3) {
-            disableSpinner(xSpinner)
+        timeResSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                //updateHint(resolutionHint)
+            }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateHint(resolutionHint)
+            }
         }
-
-
-
     }
 
     private fun saveConfigs() {
-
-        DatabaseHelper(this).setXAxisColumn(tableName, xSpinner.selectedItem.toString())
-
-        DatabaseHelper(this).setTimeFormat(tableName, timeSpinner.selectedItemPosition)
+        DatabaseHelper(this).setTimeResolution(tableName, timeResSpinner.selectedItemPosition)
 
         val resultIntent= Intent()
         setResult(Activity.RESULT_OK, resultIntent)
         finish()
     }
 
-    private fun xColumnSpinnerPosition(): Int {
-        val currentXCol = DatabaseHelper(this).getXAxisColumn(tableName)
-        return columnNames.indexOf(currentXCol)
+    private val resNames = arrayOf("month", "week", "day", "hour", "minute")
+
+    private fun updateHint(hint: TextView) {
+        var hintString = "Aggregate entries by "
+        hintString += resNames[timeResSpinner.selectedItemPosition]
+        hintString += ", beginning " + DatabaseHelper(this).formattedStartTime(tableName)
+        hint.text = hintString
     }
 
-    private fun enableSpinner(spin: Spinner) {
-        spin.isEnabled = true
-        spin.alpha = 1f
-    }
-
-    private fun disableSpinner(spin: Spinner) {
-        spin.isEnabled = false
-        spin.alpha = 0.75f
-        //spin.setSelection(0)
-    }
 }
+

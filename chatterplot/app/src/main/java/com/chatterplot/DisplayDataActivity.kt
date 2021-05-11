@@ -132,7 +132,7 @@ class DisplayDataActivity : AppCompatActivity() {
             var writer: BufferedWriter = BufferedWriter(osw)
 
             // write col headers
-            var headerVals = adapter.getColumnNames()
+            var headerVals = DatabaseHelper(this).getColumnNames(tableName)
             var header = ""
             for (i in headerVals.indices) {
 

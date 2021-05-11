@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -28,8 +29,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_dataset_list.*
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity(), RecognitionListener {
+class MainActivity : AppCompatActivity(), RecognitionListener, TextToSpeech.OnInitListener {
     private val permission = 10
     private val RECOGNIZER_REQUEST_CODE = 20
     private val CREATE_REQUEST_CODE = 30
@@ -39,10 +42,15 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     private lateinit var speechRecognizer: SpeechRecognizer
     private var getcommand = false
     private lateinit var search_bar: SearchView
+    private var tts: TextToSpeech? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //showTutorial(null)
+
+        tts = TextToSpeech(this, this)
 
         val datasetList = getDatabases()
 
@@ -73,18 +81,9 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             getCommand()
         }
 
-//        val createDatasetButton = findViewById<Button>(R.id.createTableButton)
-//        createDatasetButton.setOnClickListener { view ->
-//            showCreateDialog(view)
-//        }
-
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottom_app_bar)
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
             when(menuItem.itemId) {
-                /*R.id.search_dataset -> {
-                    Toast.makeText(this, "Search not implemented yet", Toast.LENGTH_LONG).show()
-                    true
-                }*/
                 R.id.create_dataset -> {
                     val intent = Intent(this, CreateDatasetActivity::class.java)
                     startActivityForResult(intent, CREATE_REQUEST_CODE)
@@ -130,8 +129,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         if(requestCode == RECOGNIZER_REQUEST_CODE) {
             if(resultCode == RESULT_OK || null != data) {
                 val res: ArrayList<String> = data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-//                val textView = findViewById<TextView>(R.id.textView)
-//                textView.text = res[0]
+//              res[0] is the string of the command
                 Log.i("SpeechRecognizer", "returned text: ".plus(res[0]))
                 val speechProcessor = SpeechProcessor(this)
                 if (speechProcessor.textProcessing(res[0], null) == 1) {
@@ -196,6 +194,11 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         startActivity(intent)
     }
 
+    fun showTutorial(v:View?) {
+        val intent = Intent(this, TutorialActivity::class.java)
+        startActivity(intent)
+    }
+
     fun initContinuousRecog() {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer.setRecognitionListener(this)
@@ -216,7 +219,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     }
 
     override fun onReadyForSpeech(params: Bundle?) {
-        Log.i("continuousRecog", "Ready to listen")
+        //Log.i("continuousRecog", "Ready to listen")
     }
 
     override fun onRmsChanged(rmsdB: Float) {
@@ -271,6 +274,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         for (word in result!!) {
             if (word == "listen") {
                 command = true
+                speakTest()
+
             }
             Log.i("continuousRecog", "Result: ".plus(word))
         }
@@ -281,4 +286,32 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             speechRecognizer.startListening(continuousRecogIntent)
         }
     }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts!!.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language specified is not supported!")
+            }
+        } else {
+            Log.e("TTS", "Initilization Failed!")
+        }
+    }
+
+    private fun speakTest() {
+        val text = "Testing Text to Speech Capabilities"
+        tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null,"")
+    }
+
+    public override fun onDestroy() {
+        // Shutdown TTS
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
+        super.onDestroy()
+    }
+
 }

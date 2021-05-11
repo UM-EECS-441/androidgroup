@@ -23,6 +23,11 @@ class SpeechProcessor(ctext: Context) {
         }
     }
 
+    //Create a new categorical dataset called spending with three columns, food, gas, and rent
+    //
+    //
+    //Insert 32 pushups, 53 situps, and 45 squats into exercise
+
     private fun insertDataset(text:String, tableName:String?):Boolean {
         var words = text.split(" ").toMutableList()
         if(words[0] == "insert" || words[0] == "add" || words[0] == "enter") {
@@ -71,11 +76,13 @@ class SpeechProcessor(ctext: Context) {
     private fun createDataset(text: String): Boolean {
         if ((text.contains("make") || text.contains("create") ||
                     text.contains("new") || text.contains("start")) &&
-            text.contains("data")) {
+            (text.contains("data") || text.contains("dating site"))) {
             var nameStart = text.length
             var nameEnd = text.length
-            var numColumns: Int = 0
+            var numColumns = 0
             var columnNames = arrayListOf<String>()
+            var isCategorical = 0
+            if (text.contains("categorical")) isCategorical = 1
             try {
                 for ((idx, word) in text.split(" ").withIndex()) {
                     Log.i("SpeechRecognizer", "text response word: ".plus(word))
@@ -95,10 +102,10 @@ class SpeechProcessor(ctext: Context) {
                             }
                         }
                         var columnCount = 0
-                        for (i in (idx + 2) until textList.size) {
+                        for (i in (idx + 1) until textList.size) {
                             if (columnCount >= numColumns) break
-                            if (textList[i] == "and" || textList[i] == "+") continue
-                            columnNames.add(textList[i])
+                            if (textList[i] == "and" || textList[i] == "+" || textList[i] == "called" || textList[i] == "named") continue
+                            columnNames.add(textList[i].capitalize())
                             columnCount += 1
                         }
                         if (columnCount == 0) {
@@ -114,9 +121,9 @@ class SpeechProcessor(ctext: Context) {
                 // Run create dataset function
 
                 if (columnNames.isEmpty()) {
-                    DatabaseHelper(context).createNewDataset(name!!, arrayListOf<String>("Y"), 0)
+                    DatabaseHelper(context).createNewDataset(name!!, arrayListOf<String>("Y"), isCategorical)
                 } else {
-                    DatabaseHelper(context).createNewDataset(name!!, columnNames, 0)
+                    DatabaseHelper(context).createNewDataset(name!!, columnNames, isCategorical)
                 }
                 Log.i("SpeechRecognizer","creating dataset named: ".plus(name))
                 Toast.makeText(context, "Creating Dataset named: ".plus(name), Toast.LENGTH_SHORT).show()

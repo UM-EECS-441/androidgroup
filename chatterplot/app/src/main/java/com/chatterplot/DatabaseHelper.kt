@@ -18,9 +18,6 @@ class Schema(val name: String) {
     fun addColumn(name: String, type: String) {
         columns.add(Pair(name, type))
     }
-    fun setXAxisColumn(checker: String) {
-        xAxisColumnName = checker
-    }
 }
 
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
@@ -54,19 +51,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
 //        sqlval.put("Timestamp", System.currentTimeMillis() / 1000.0)
         sqlval.put("Timestamp", Instant.now().toEpochMilli())
         db.update("DATASET", sqlval, "TableName='${tableName}'", null)
-    }
-
-    fun changeDatabaseName(oldName: String, newName: String) {
-        val db = this.writableDatabase
-        val args = ContentValues()
-        args.put("TableName", newName)
-        val query = "ALTER TABLE [$oldName] RENAME TO [$newName]"
-
-        db.beginTransaction()
-        db.update("DATASET", args, "TableName=[$oldName]", null)
-        db.execSQL(query)
-        db.setTransactionSuccessful()
-        db.endTransaction()
     }
 
     private fun <T> Cursor.toArrayList(block: (Cursor) -> T) : ArrayList<T> {
@@ -231,13 +215,6 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         }
         cursor.close()
         return result
-    }
-
-    fun setXAxisColumn(datasetName: String, newXAxis: String) {
-        val db = this.writableDatabase
-        val cv = ContentValues()
-        cv.put("xAxis", newXAxis)
-        db.update("DIRECTORY", cv, "TableName='$datasetName'", null)
     }
 
     // setTimeResolution
@@ -451,22 +428,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(
         sortedTableMap.forEach { (t, u) ->
             var rowArray = arrayListOf<String?>()
             if (!isCategorical(tableName)) rowArray.add(t.toString())
-
-            // Old implementation for raw per-input rows
-            /*
-            val uSize = u.size
-            var uChecker = 0
-            for (col in columns) {
-                if (uChecker >= uSize || u[uChecker].first != col) {
-                    rowArray.add("-")
-                } else {
-                    rowArray.add(u[uChecker].second.toString())
-                    ++uChecker
-                }
-            }
-            */
             
-            // New implementation for additive per-unit-of-time rows
             for (col in columns) {
                 var hasData: Boolean = false
                 var colTotal = 0
